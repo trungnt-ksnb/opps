@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class WorkPackage extends AccountAudit{
+@Table(name = "WorkPackage")
+public class WorkPackage {
     @Id
     @Basic(optional = false)
     @Column(name = "idWorkPackage")
