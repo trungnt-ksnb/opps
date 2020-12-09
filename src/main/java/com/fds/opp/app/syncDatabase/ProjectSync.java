@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectSync {
-    public static void main(String[] args) throws Exception {
+
+    public static List<Project> getListProjectFromAPI() throws Exception {
+
         String url = "http://localhost:8080/api/v3/projects/";
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -50,10 +52,15 @@ public class ProjectSync {
             System.out.println("Object p : " + p);
             listProject.add(p);
         }
-        for (Project project : listProject) {
+        return listProject;
+    }
+
+    public static void main(String[] args) throws Exception {
+        ProjectSync ps = new ProjectSync();
+        List<Project> listProject = ps.getListProjectFromAPI();
+        for (Project project: listProject) {
             System.out.println(project);
         }
     }
-
 }
 

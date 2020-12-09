@@ -4,16 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Account extends AccountAudit {
+@Table(name = "Account")
+public class Account {
     @Id
     @Basic(optional = false)
     @Column(name = "idUser")
