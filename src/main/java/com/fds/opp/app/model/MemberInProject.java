@@ -21,6 +21,4 @@ public class MemberInProject extends AccountAudit {
     private Integer idProject;
     @Column(name = "idUser")
     private Integer idUser;
-
-
 }

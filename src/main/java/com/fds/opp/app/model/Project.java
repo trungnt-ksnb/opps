@@ -24,5 +24,15 @@ public class Project extends AccountAudit{
     @Column(name = "descriptionProject")
     private String descriptionProject;
 
+    public void setIdProject(Integer idProject) {
+        this.idProject = idProject;
+    }
 
+    public void setNameProject(String nameProject) {
+        this.nameProject = nameProject;
+    }
+
+    public void setDescriptionProject(String descriptionProject) {
+        this.descriptionProject = descriptionProject;
+    }
 }
