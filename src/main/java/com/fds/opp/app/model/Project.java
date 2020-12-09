@@ -22,12 +22,24 @@ public class Project {
     @Column(name = "descriptionProject")
     private String descriptionProject;
 
+    public Integer getIdProject() {
+        return idProject;
+    }
+
     public void setIdProject(Integer idProject) {
         this.idProject = idProject;
     }
 
+    public String getNameProject() {
+        return nameProject;
+    }
+
     public void setNameProject(String nameProject) {
         this.nameProject = nameProject;
+    }
+
+    public String getDescriptionProject() {
+        return descriptionProject;
     }
 
     public void setDescriptionProject(String descriptionProject) {
