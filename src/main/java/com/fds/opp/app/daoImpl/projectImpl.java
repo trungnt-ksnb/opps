@@ -1,4 +1,4 @@
-package com.fds.opp.app.controller;
+package com.fds.opp.app.daoImpl;
 
 import com.fds.opp.app.model.Project;
 import com.fds.opp.app.syncDatabase.ProjectSync;
@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.List;
 
 @SpringBootApplication
-public class ProjectController {
+public class projectImpl {
     @Test
     public void crud() throws Exception {
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
@@ -81,6 +81,16 @@ public class ProjectController {
         catch (Exception e)
         {
             e.printStackTrace();
+        } session.close();
+    }
+    public void syncProject(Session session) throws Exception
+    {
+        List<Project> listProject = ProjectSync.getListProjectFromAPI();
+        System.out.println("Syncing table Project ...");
+        for (Project wp: listProject) {
+            session.beginTransaction();
+            session.saveOrUpdate(wp);
+            session.getTransaction().commit();
         }
     }
 

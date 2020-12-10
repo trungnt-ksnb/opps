@@ -23,6 +23,7 @@ public class MemberInProject {
     @Column(name = "idUser")
     private String nameUser;
 
+
     public Integer getIdMemberShip() {
         return idMemberShip;
     }

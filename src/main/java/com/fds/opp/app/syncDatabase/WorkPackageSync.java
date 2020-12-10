@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 public class WorkPackageSync {
-    public static void main (String[] args) throws Exception{
+    public static List<WorkPackage> getListWorkPackage () throws Exception{
         String url = "http://localhost:8080/api/v3/work_packages/";
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -67,7 +67,7 @@ public class WorkPackageSync {
             workPackage.setNameUser(assignee.getString("title"));
             JSONObject author = new JSONObject(links.get("author").toString());
             workPackage.setAuthor(author.getString("title"));
-            listWorkPackage.add(workPackage);
+
             if (type.getString("title").equals("Milestone") == false )
             {
                 String startDateString = jsonObject.get("startDate").toString();
@@ -118,9 +118,8 @@ public class WorkPackageSync {
                 deadlineDate = null;
                 workPackage.setDeadlineDate(deadlineDate);
             }
+            listWorkPackage.add(workPackage);
         }
-        for (WorkPackage workPackage : listWorkPackage) {
-            System.out.println(workPackage);
-        }
+        return listWorkPackage;
     }
 }

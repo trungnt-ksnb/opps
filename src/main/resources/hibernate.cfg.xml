@@ -23,6 +23,8 @@
  
         <!-- Annotated entity classes -->
         <mapping class="com.fds.opp.app.model.Project"/>
+        <mapping class="com.fds.opp.app.model.MemberInProject"/>
+        <mapping class="com.fds.opp.app.model.WorkPackage"/>
         
     </session-factory>
 </hibernate-configuration>

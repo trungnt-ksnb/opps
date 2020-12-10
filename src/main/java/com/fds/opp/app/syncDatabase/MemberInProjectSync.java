@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 public class MemberInProjectSync {
-    public static void main(String[] args) throws Exception {
+    public static List<MemberInProject> getListMemberInProject() throws Exception {
         String url = "http://localhost:8080/api/v3/memberships/";
         String user = "apikey";
         String key = "ab27f58e5b5dec6ab34b1a7933d90192d0b3d19e7df80f8a7db7c3f85ca6417c";
@@ -64,9 +64,7 @@ public class MemberInProjectSync {
             listMemberInProject.add(memberInProject);
             System.out.println(memberInProject);
         }
-        for (MemberInProject member : listMemberInProject) {
-            System.out.println(member);
-        }
+        return listMemberInProject;
 
     }
 }

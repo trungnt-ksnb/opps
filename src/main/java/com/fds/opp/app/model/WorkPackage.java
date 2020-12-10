@@ -41,48 +41,96 @@ public class WorkPackage {
     @Column (name="author")
     private String author;
 
+    public Integer getIdWorkPackage() {
+        return idWorkPackage;
+    }
+
     public void setIdWorkPackage(Integer idWorkPackage) {
         this.idWorkPackage = idWorkPackage;
+    }
+
+    public String getNameWorkPackage() {
+        return nameWorkPackage;
     }
 
     public void setNameWorkPackage(String nameWorkPackage) {
         this.nameWorkPackage = nameWorkPackage;
     }
 
+    public String getDescriptionWorkPackage() {
+        return descriptionWorkPackage;
+    }
+
     public void setDescriptionWorkPackage(String descriptionWorkPackage) {
         this.descriptionWorkPackage = descriptionWorkPackage;
+    }
+
+    public Date getStartDate() {
+        return startDate;
     }
 
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
+    public Date getDueDate() {
+        return dueDate;
+    }
+
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public Date getDeadlineDate() {
+        return deadlineDate;
     }
 
     public void setDeadlineDate(Date deadlineDate) {
         this.deadlineDate = deadlineDate;
     }
 
+    public String getPriorityWorkPackage() {
+        return priorityWorkPackage;
+    }
+
     public void setPriorityWorkPackage(String priorityWorkPackage) {
         this.priorityWorkPackage = priorityWorkPackage;
+    }
+
+    public String getStatusWorkPackage() {
+        return statusWorkPackage;
     }
 
     public void setStatusWorkPackage(String statusWorkPackage) {
         this.statusWorkPackage = statusWorkPackage;
     }
 
+    public String getTypeWorkPackage() {
+        return typeWorkPackage;
+    }
+
     public void setTypeWorkPackage(String typeWorkPackage) {
         this.typeWorkPackage = typeWorkPackage;
+    }
+
+    public String getNameProject() {
+        return nameProject;
     }
 
     public void setNameProject(String nameProject) {
         this.nameProject = nameProject;
     }
 
+    public String getNameUser() {
+        return nameUser;
+    }
+
     public void setNameUser(String nameUser) {
         this.nameUser = nameUser;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     public void setAuthor(String author) {
