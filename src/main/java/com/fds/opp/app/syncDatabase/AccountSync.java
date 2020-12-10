@@ -14,16 +14,16 @@ import org.json.JSONObject;
 import com.fds.opp.app.model.Account;
 
 public class AccountSync {
-	public static void main(String[] args) {
-		try {
-			AccountSync.callme();
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
-	}
-
-	private static void callme() throws Exception{
+	
+//	public static void main(String[] args) {
+//		try {
+//			AccountSync.getListAccountFromAPI();
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//	}
+	
+	public static List<Account> getListAccountFromAPI() throws Exception{
 		// TODO Auto-generated method stub
 		String url = "http://localhost:8080/api/v3/users/";
 		String user = "apikey";
@@ -90,6 +90,7 @@ public class AccountSync {
 		for(Account temp : accList) {
 			System.out.println(temp);
 		}
+		return accList;
 		
 	}
 }
