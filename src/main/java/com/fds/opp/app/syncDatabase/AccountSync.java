@@ -87,9 +87,9 @@ public class AccountSync {
 			account.setIsAdmin(obj_i.getBoolean("admin"));
 			accList.add(account);
 		}
-		for(Account temp : accList) {
-			System.out.println(temp);
-		}
+//		for(Account Account : accList) {
+//			System.out.println(Account);
+//		}
 		return accList;
 		
 	}
