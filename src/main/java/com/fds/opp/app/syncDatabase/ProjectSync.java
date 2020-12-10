@@ -55,12 +55,12 @@ public class ProjectSync {
         return listProject;
     }
 
-    public static void main(String[] args) throws Exception {
-        ProjectSync ps = new ProjectSync();
-        List<Project> listProject = ps.getListProjectFromAPI();
-        for (Project project: listProject) {
-            System.out.println(project);
-        }
-    }
+//    public static void main(String[] args) throws Exception {
+//        ProjectSync ps = new ProjectSync();
+//        List<Project> listProject = ps.getListProjectFromAPI();
+//        for (Project project: listProject) {
+//            System.out.println(project);
+//        }
+//    }
 }
 
