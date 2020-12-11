@@ -3,6 +3,9 @@ package com.fds.opp.app.daoImpl;
 import com.fds.opp.app.model.MemberInProject;
 import com.fds.opp.app.syncDatabase.MemberInProjectSync;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.Test;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,10 +13,10 @@ import java.util.List;
 @Service
 @Transactional
 public class memberInProjectImpl {
-//    @Test
-//    public void crud() throws Exception {
-//        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-//        Session session = sessionFactory.openSession();
+    @Test
+    public void crud() throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
 ////        create(session);
 ////        Project pj = new Project();
 ////        pj.setIdProject(1);
@@ -27,10 +30,10 @@ public class memberInProjectImpl {
 ////        delete(session, pj_Delete);
 ////        read(session, 1);
 //
-//        syncMemberInProject(session);
-//        session.close();
-//    }
-    public void create(Session session) throws Exception
+        syncMemberInProject(session);
+        session.close();
+    }
+    public static void create(Session session) throws Exception
     {
         System.out.println("Creating Table Project...");
         List<MemberInProject> listMemberInProject = MemberInProjectSync.getListMemberInProject();
@@ -40,7 +43,13 @@ public class memberInProjectImpl {
             session.getTransaction().commit();
         }
     }
-    public void syncMemberInProject(Session session) throws Exception
+    public static void addNewMemberInProject(Session session, MemberInProject memberInProject){
+        System.out.println("Creating Table Project...");
+        session.beginTransaction();
+        session.save(memberInProject);
+        session.getTransaction().commit();
+    }
+    public static void syncMemberInProject(Session session)
     {
         try {
             List<MemberInProject> listMemberInProject = MemberInProjectSync.getListMemberInProject();
@@ -55,7 +64,7 @@ public class memberInProjectImpl {
             e.printStackTrace();
         }
     }
-    public void update(Session session, MemberInProject memberUpdate) throws Exception
+    public static void update(Session session, MemberInProject memberUpdate)
     {
         try{
             System.out.println("Updating Table Project...");
@@ -73,7 +82,7 @@ public class memberInProjectImpl {
             e.printStackTrace();
         }
     }
-    public void delete(Session session, Integer idMemberInProject) throws Exception
+    public static void delete(Session session, Integer idMemberInProject)
     {
         try{
             System.out.println("Deleting Table Project...");
@@ -87,7 +96,7 @@ public class memberInProjectImpl {
             e.printStackTrace();
         }
     }
-    public void read(Session session, Integer id)
+    public static void read(Session session, Integer id)
     {
         try
         {

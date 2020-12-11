@@ -12,41 +12,43 @@ import java.util.List;
 
 @SpringBootApplication
 public class projectImpl {
-    @Test
-    public void crud() throws Exception {
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
-//        create(session);
-//        Project pj = new Project();
-//        pj.setIdProject(1);
-//        pj.setNameProject("Updating Project");
-//        pj.setDescriptionProject("Updated Complete!");
-//        update(session,pj);
-//        Project pj_Delete = new Project();
-//        pj_Delete.setNameProject("Project Test 1");
-//        pj_Delete.setIdProject(34);
-//        pj_Delete.setDescriptionProject("");
-//        delete(session, pj_Delete);
-        read(session, 1);
-        session.close();
-    }
-    public void create(Session session) throws Exception
+    public static void create(Session session)
     {
-        System.out.println("Creating Table Project...");
-        List<Project> listProject = ProjectSync.getListProjectFromAPI();
-        for (Project project: listProject) {
+        try {
+            System.out.println("Creating Table Project...");
+            List<Project> listProject = ProjectSync.getListProjectFromAPI();
+            for (Project project: listProject) {
+                session.beginTransaction();
+                session.save(project);
+                session.getTransaction().commit();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    public static void addProject(Session session, Project project)
+    {
+        try {
+            System.out.println("Adding Project...");
             session.beginTransaction();
             session.save(project);
             session.getTransaction().commit();
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
-    public void update(Session session, Project project) throws Exception
+    public static void update(Session session, Project project)
     {
         try{
             System.out.println("Updating Table Project...");
             Project projectAfterUpdate = (Project) session.get(Project.class, project.getIdProject());
             projectAfterUpdate.setNameProject(project.getNameProject());
             projectAfterUpdate.setDescriptionProject(project.getDescriptionProject());
+            projectAfterUpdate.setStatus(project.getStatus());
             session.beginTransaction();
             session.saveOrUpdate(projectAfterUpdate);
             session.getTransaction().commit();
@@ -56,7 +58,7 @@ public class projectImpl {
             e.printStackTrace();
         }
     }
-    public void delete(Session session, Project project) throws Exception
+    public static void delete(Session session, Project project) throws Exception
     {
         try{
             System.out.println("Deleting Table Project...");
@@ -70,7 +72,7 @@ public class projectImpl {
             e.printStackTrace();
         }
     }
-    public void read(Session session, Integer id)
+    public static void read(Session session, Integer id)
     {
         try
         {
@@ -81,16 +83,22 @@ public class projectImpl {
         catch (Exception e)
         {
             e.printStackTrace();
-        } session.close();
+        }
     }
-    public void syncProject(Session session) throws Exception
+    public static void syncProject(Session session)
     {
-        List<Project> listProject = ProjectSync.getListProjectFromAPI();
-        System.out.println("Syncing table Project ...");
-        for (Project wp: listProject) {
-            session.beginTransaction();
-            session.saveOrUpdate(wp);
-            session.getTransaction().commit();
+        try {
+            List<Project> listProject = ProjectSync.getListProjectFromAPI();
+            System.out.println("Syncing table Project ...");
+            for (Project wp: listProject) {
+                session.beginTransaction();
+                session.saveOrUpdate(wp);
+                session.getTransaction().commit();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 

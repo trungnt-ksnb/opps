@@ -9,15 +9,7 @@ import java.util.List;
 
 @SpringBootApplication
 public class workPackageImpl {
-//    @Test
-//    public void crud() throws Exception {
-//        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-//        Session session = sessionFactory.openSession();
-//        syncWorkPackage(session);
-//        session.close();
-//    }
-
-    public void create(Session session) throws Exception {
+    public static void create(Session session) throws Exception {
         try {
             System.out.println("Create table Workpackage...");
             List<WorkPackage> listWorkpackage = WorkPackageSync.getListWorkPackage();
@@ -32,8 +24,18 @@ public class workPackageImpl {
             e.printStackTrace();
         }
     }
+    public static void addWorkPackage(Session session, WorkPackage workPackage){
+        try {
+            session.beginTransaction();
+            session.save(workPackage);
+            session.getTransaction().commit();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 
-    public void update(Session session, WorkPackage workPackage)
+    public static void update(Session session, WorkPackage workPackage)
     {
         try {
             System.out.println("Updating 1 value");
@@ -59,7 +61,7 @@ public class workPackageImpl {
         }
 
     }
-    public void delete(Session session, Integer idWorkPackage)
+    public static void delete(Session session, Integer idWorkPackage)
     {
         try {
             System.out.println("Deleting 1 value");
@@ -73,7 +75,7 @@ public class workPackageImpl {
             e.printStackTrace();
         }
     }
-    public void syncWorkPackage(Session session)
+    public static void syncWorkPackage(Session session)
     {
         try {
             List<WorkPackage> listWorkspace = WorkPackageSync.getListWorkPackage();
