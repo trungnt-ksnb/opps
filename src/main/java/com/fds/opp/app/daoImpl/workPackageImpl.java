@@ -40,7 +40,6 @@ public class workPackageImpl {
         try {
             System.out.println("Updating 1 value");
             WorkPackage wpUpdate = (WorkPackage) session.get(WorkPackage.class, workPackage.getIdWorkPackage());
-            //        wpUpdate.setIdWorkPackage(workPackage.getIdWorkPackage());
             wpUpdate.setNameWorkPackage(workPackage.getNameWorkPackage());
             wpUpdate.setDescriptionWorkPackage(workPackage.getDescriptionWorkPackage());
             wpUpdate.setStartDate(workPackage.getStartDate());
@@ -53,7 +52,7 @@ public class workPackageImpl {
             wpUpdate.setNameUser(workPackage.getNameUser());
             wpUpdate.setAuthor(workPackage.getAuthor());
             session.beginTransaction();
-            session.save(wpUpdate);
+            session.update(wpUpdate);
             session.getTransaction().commit();
         } catch (Exception e)
         {
