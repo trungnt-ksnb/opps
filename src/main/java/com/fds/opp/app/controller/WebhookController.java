@@ -6,19 +6,14 @@ import com.fds.opp.app.daoImpl.workPackageImpl;
 import com.fds.opp.app.model.MemberInProject;
 import com.fds.opp.app.model.Project;
 import com.fds.opp.app.model.WorkPackage;
-import com.fds.opp.app.repository.ProjectRepository;
-import com.fds.opp.app.syncDatabase.ProjectSync;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.plugin2.message.Message;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,7 +27,7 @@ public class WebhookController {
     public static List<com.fds.opp.app.model.Message> newRequest(@RequestBody String JsonString) throws Exception
     {
         System.out.println(JsonString);
-        List<com.fds.opp.app.model.Message> listMessage = new ArrayList<com.fds.opp.app.model.Message>();
+        List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
         JSONObject request = new JSONObject(JsonString);
@@ -59,6 +54,7 @@ public class WebhookController {
                 } else if(oldProject.getStatus().equals(newProject.getStatus())){
                     MessageContent += "Trạng Thái Dự Án được thay đổi: " + oldProject.getStatus() + " -> " + newProject.getStatus() + "\n";
                 }
+                memberInProjectImpl.syncMemberInProject(session);
                 List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, oldProject.getNameProject());
                 for (MemberInProject eachMember: memberInProjects) {
                     com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
@@ -129,7 +125,7 @@ public class WebhookController {
                 workPackageImpl.addWorkPackage(session, newWorkPackage);
                 session.close();
             }else if(action.equals("work_package:updated")){
-                WorkPackage oldWorkPackage = (WorkPackage) session.get(WorkPackage.class, newWorkPackage.getIdWorkPackage());
+                WorkPackage oldWorkPackage = session.get(WorkPackage.class, newWorkPackage.getIdWorkPackage());
                 if(!oldWorkPackage.getNameWorkPackage().equals(newWorkPackage.getNameWorkPackage())){
                     MessageContent += "Tên CV được cập nhật : " + oldWorkPackage.getNameWorkPackage() + " -> " +  newWorkPackage.getNameWorkPackage() + "\n";
                 } else if(!oldWorkPackage.getDescriptionWorkPackage().equals(newWorkPackage.getDescriptionWorkPackage())){
@@ -145,19 +141,20 @@ public class WebhookController {
                 } else if(!oldWorkPackage.getNameUser().equals(newWorkPackage.getNameUser())){
                     MessageContent += "Người thực hiện CV được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser();
                 }
-                List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
-                for (MemberInProject eachMember: memberInProjects) {
-                    com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
-                    MessageObj.setNameUser(eachMember.getNameUser());
-                    MessageObj.setRole(eachMember.getRoles());
-                    MessageObj.setMessage(MessageContent);
-                    listMessage.add(MessageObj);
-                }
                 workPackageImpl.update(session, newWorkPackage);
                 session.close();
             } else{
                 System.out.println("Lỗi Workpackage!");
                     MessageContent+="Lỗi Package";
+            }
+            memberInProjectImpl.syncMemberInProject(session);
+            List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
+            for (MemberInProject eachMember: memberInProjects) {
+                com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
+                MessageObj.setNameUser(eachMember.getNameUser());
+                MessageObj.setRole(eachMember.getRoles());
+                MessageObj.setMessage(MessageContent);
+                listMessage.add(MessageObj);
             }
         }
         return listMessage;
