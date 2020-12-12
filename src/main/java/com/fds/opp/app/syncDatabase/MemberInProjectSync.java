@@ -15,7 +15,7 @@ public class MemberInProjectSync {
     public static List<MemberInProject> getListMemberInProject() throws Exception {
         String url = "http://localhost:8080/api/v3/memberships/";
         String user = "apikey";
-        String key = "ab27f58e5b5dec6ab34b1a7933d90192d0b3d19e7df80f8a7db7c3f85ca6417c";
+        String key = "150b013a2d97f0cdcbc8471a681b11015f9332db5b51fc0c3fcc03c1966fda30";
         String auth = user + ":" + key;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());;
         URL obj = new URL(url);

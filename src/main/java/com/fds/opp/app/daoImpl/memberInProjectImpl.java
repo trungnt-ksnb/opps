@@ -9,6 +9,8 @@ import org.junit.Test;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 @Service
 @Transactional
@@ -30,7 +32,7 @@ public class memberInProjectImpl {
 ////        delete(session, pj_Delete);
 ////        read(session, 1);
 //
-        syncMemberInProject(session);
+        read(session, "Test 1");
         session.close();
     }
     public static void create(Session session) throws Exception
@@ -96,17 +98,26 @@ public class memberInProjectImpl {
             e.printStackTrace();
         }
     }
-    public static void read(Session session, Integer id)
+    public static List<MemberInProject> read(Session session, String nameProject)
     {
         try
         {
             System.out.println("Reading Database");
-            MemberInProject findMemberInProject = (MemberInProject) session.get(MemberInProject.class, id);
-            System.out.println(findMemberInProject);
+
+            List<MemberInProject> findMemberInProject = session.createQuery("from MemberInProject", MemberInProject.class).getResultList();
+            for (MemberInProject memberInProject:findMemberInProject
+                 ) {
+                System.out.println(memberInProject.getNameProject());
+                System.out.println(memberInProject.getIdMemberShip());
+                System.out.println(memberInProject.getNameUser());
+                System.out.println(memberInProject.getRoles());
+            }
+            return findMemberInProject;
         }
         catch (Exception e)
         {
             e.printStackTrace();
-        } session.close();
+            return null;
+        }
     }
 }
