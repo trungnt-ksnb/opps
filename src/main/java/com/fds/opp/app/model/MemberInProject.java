@@ -11,9 +11,9 @@ public class MemberInProject {
     private Integer idMemberShip;
     @Column(name = "roles")
     private String roles;
-    @Column(name = "idProject")
+    @Column(name = "nameProject")
     private String nameProject;
-    @Column(name = "idUser")
+    @Column(name = "nameUser")
     private String nameUser;
 
 

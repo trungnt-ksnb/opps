@@ -3,12 +3,22 @@ package com.fds.opp.app.daoImpl;
 import com.fds.opp.app.model.WorkPackage;
 import com.fds.opp.app.syncDatabase.WorkPackageSync;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 
 @SpringBootApplication
 public class workPackageImpl {
+    @Test
+    public void crud() throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        syncWorkPackage(session);
+        session.close();
+    }
     public static void create(Session session) throws Exception {
         try {
             System.out.println("Create table Workpackage...");
@@ -51,6 +61,7 @@ public class workPackageImpl {
             wpUpdate.setNameProject(workPackage.getNameProject());
             wpUpdate.setNameUser(workPackage.getNameUser());
             wpUpdate.setAuthor(workPackage.getAuthor());
+            wpUpdate.setAccountable(workPackage.getAccountable());
             session.beginTransaction();
             session.update(wpUpdate);
             session.getTransaction().commit();

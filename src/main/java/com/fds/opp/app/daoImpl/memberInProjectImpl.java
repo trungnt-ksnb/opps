@@ -32,6 +32,7 @@ public class memberInProjectImpl {
 ////        delete(session, pj_Delete);
 ////        read(session, 1);
 //
+//        syncMemberInProject(session);
         read(session, "Test 1");
         session.close();
     }
@@ -103,16 +104,15 @@ public class memberInProjectImpl {
         try
         {
             System.out.println("Reading Database");
-
+            List<MemberInProject> result = new ArrayList<>();
             List<MemberInProject> findMemberInProject = session.createQuery("from MemberInProject", MemberInProject.class).getResultList();
-            for (MemberInProject memberInProject:findMemberInProject
-                 ) {
-                System.out.println(memberInProject.getNameProject());
-                System.out.println(memberInProject.getIdMemberShip());
-                System.out.println(memberInProject.getNameUser());
-                System.out.println(memberInProject.getRoles());
+            for (MemberInProject memberInProject:findMemberInProject) {
+                if(memberInProject.getNameProject().equals(nameProject)){
+                    result.add(memberInProject);
+                    System.out.println(memberInProject);
+                }
             }
-            return findMemberInProject;
+            return result;
         }
         catch (Exception e)
         {

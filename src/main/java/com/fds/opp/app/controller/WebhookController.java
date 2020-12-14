@@ -1,9 +1,11 @@
 package com.fds.opp.app.controller;
 
+import com.fds.opp.app.daoImpl.MessageImpl;
 import com.fds.opp.app.daoImpl.memberInProjectImpl;
 import com.fds.opp.app.daoImpl.projectImpl;
 import com.fds.opp.app.daoImpl.workPackageImpl;
 import com.fds.opp.app.model.MemberInProject;
+import com.fds.opp.app.model.Message;
 import com.fds.opp.app.model.Project;
 import com.fds.opp.app.model.WorkPackage;
 import org.hibernate.Session;
@@ -14,6 +16,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +32,14 @@ public class WebhookController {
     @PostMapping("/create")
     public static List<com.fds.opp.app.model.Message> newRequest(@RequestBody String JsonString) throws Exception
     {
+        ApiContextInitializer.init();
+        TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
+        try {
+            telegramBotsApi.registerBot(new TelegramBot());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
         System.out.println(JsonString);
         List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
@@ -70,6 +84,8 @@ public class WebhookController {
             WorkPackage newWorkPackage = new WorkPackage();
             JSONObject work_package = new JSONObject(request.get("work_package").toString());
             newWorkPackage.setIdWorkPackage(work_package.getInt("id"));
+            String ActivitesAuthor = ActivitiesGetAuthor.getAuthor(work_package.getInt("id"));
+            System.out.println("Tên người làm : "+ ActivitesAuthor);
             newWorkPackage.setNameWorkPackage(work_package.get("subject").toString());
             JSONObject description = new JSONObject(work_package.get("description").toString());
             newWorkPackage.setDescriptionWorkPackage(description.get("raw").toString());
@@ -78,6 +94,7 @@ public class WebhookController {
             String deadlineDateString = "2020-12-12";
             SimpleDateFormat formatter1=new SimpleDateFormat("yyyy-MM-dd");
             Date startDate, dueDate, deadlineDate;
+
             if(startDateString.equals("null") || startDateString.equals("")) {
                 startDate = null;
             } else{
@@ -113,6 +130,15 @@ public class WebhookController {
             } else {
                 assigneeString = assignJS.get("title").toString();
             }
+            JSONObject responsibleJS = new JSONObject(_links.get("responsible").toString());
+            String responsible = _links.get("responsible").toString();
+            String responsibleString = "";
+            if(responsible.equals("{\"href\":null}")){
+                responsibleString = "null";
+            } else {
+                responsibleString = responsibleJS.get("title").toString();
+            }
+            newWorkPackage.setAccountable(responsibleString);
             newWorkPackage.setNameUser(assigneeString);
             System.out.println(assigneeString);
             JSONObject author = new JSONObject(_embedded.get("author").toString());
@@ -147,15 +173,25 @@ public class WebhookController {
                 System.out.println("Lỗi Workpackage!");
                     MessageContent+="Lỗi Package";
             }
+            session = sessionFactory.openSession();
             memberInProjectImpl.syncMemberInProject(session);
             List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
+            session.close();
             for (MemberInProject eachMember: memberInProjects) {
-                com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
-                MessageObj.setNameUser(eachMember.getNameUser());
-                MessageObj.setRole(eachMember.getRoles());
-                MessageObj.setMessage(MessageContent);
-                listMessage.add(MessageObj);
+                if(!eachMember.getNameUser().equals(ActivitesAuthor))
+                {
+                    Message MessageObj = new Message();
+                    MessageObj.setNameUser(eachMember.getNameUser());
+                    MessageObj.setRole(eachMember.getRoles());
+                    MessageObj.setMessage(MessageContent);
+                    MessageObj.setStatus("Pending...");
+                    listMessage.add(MessageObj);
+                    session = sessionFactory.openSession();
+                    MessageImpl.addNewMessage(session, MessageObj);
+                    session.close();
+                }
             }
+
         }
         return listMessage;
     }
