@@ -30,5 +30,9 @@ public class accountImpl {
 			session.getTransaction().commit();
 		}
 	}
+	public static Account findAccountById(Session session, int idAccount) throws Exception{
+		Account result = session.get(Account.class, idAccount);
+		return result;
+	}
 	
 }

@@ -10,18 +10,24 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
 public class WorkPackageSync {
     public static List<WorkPackage> getListWorkPackage () throws Exception{
         String url = "http://localhost:8080/api/v3/work_packages/";
+        String user = "apikey";
+        String key = "86c12665ab843cb3f96690c7c53554adbfc95cf1544f0ece2519f269860488ab";
+        String auth = user + ":" + key;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());;
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         // optional default is GET
         con.setRequestMethod("GET");
         //add request header
         con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        con.setRequestProperty("Authorization","Basic :" +  encodedAuth);
         int responseCode = con.getResponseCode();
         System.out.println("\nSending 'GET' request to URL : " + url);
         System.out.println("Response Code : " + responseCode);
@@ -67,7 +73,15 @@ public class WorkPackageSync {
             workPackage.setNameUser(assignee.getString("title"));
             JSONObject author = new JSONObject(links.get("author").toString());
             workPackage.setAuthor(author.getString("title"));
-
+            JSONObject responsibleJS = new JSONObject(links.get("responsible").toString());
+            String responsible = links.get("responsible").toString();
+            String responsibleString = "";
+            if(responsible.equals("{\"href\":null}")){
+                responsibleString = "null";
+            } else {
+                responsibleString = responsibleJS.get("title").toString();
+            }
+            workPackage.setAccountable(responsibleString);
             if (type.getString("title").equals("Milestone") == false )
             {
                 String startDateString = jsonObject.get("startDate").toString();

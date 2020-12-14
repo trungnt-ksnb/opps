@@ -33,6 +33,16 @@ public class WorkPackage {
     private String nameUser;
     @Column (name="author")
     private String author;
+    @Column(name="Accountable")
+    private String accountable;
+
+    public String getAccountable() {
+        return accountable;
+    }
+
+    public void setAccountable(String accountable) {
+        this.accountable = accountable;
+    }
 
     public Integer getIdWorkPackage() {
         return idWorkPackage;

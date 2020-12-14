@@ -1,10 +1,38 @@
 package com.fds.opp.app.model;
 
-public class Message {
-    private String nameUser;
-    private String role;
-    private String Message;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "Message")
+public class Message {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="idMessage")
+    private Integer idMessage;
+    @Column(name = "nameUser")
+    private String nameUser;
+    @Column(name = "role")
+    private String role;
+    @Column(name = "Message")
+    private String Message;
+    @Column(name="status")
+    private String status;
+
+    public Integer getIdMessage() {
+        return idMessage;
+    }
+
+    public void setIdMessage(Integer idMessage) {
+        this.idMessage = idMessage;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getNameUser() {
         return nameUser;

@@ -26,6 +26,6 @@
         <mapping class="com.fds.opp.app.model.MemberInProject"/>
         <mapping class="com.fds.opp.app.model.WorkPackage"/>
         <mapping class="com.fds.opp.app.model.Account"/>
-
+        <mapping class="com.fds.opp.app.model.Message"/>
     </session-factory>
 </hibernate-configuration>

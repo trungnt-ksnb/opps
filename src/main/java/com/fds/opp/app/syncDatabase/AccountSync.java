@@ -27,7 +27,7 @@ public class AccountSync {
 		// TODO Auto-generated method stub
 		String url = "http://localhost:8080/api/v3/users/";
 		String user = "apikey";
-		String key = "e8248254b63b490d8c0fb7a16887cfae3293976cf3fc619c42e33463574d5e39";
+		String key = "86c12665ab843cb3f96690c7c53554adbfc95cf1544f0ece2519f269860488ab";
 		String auth = "";
 		String encodeAuth = "";
 		if(user != null && key != null) {
