@@ -16,7 +16,7 @@ public class OppsApplication {
 	public static void main(String[] args) throws Exception {
 		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 		Session session = sessionFactory.openSession();
-		accountImpl.createObj(session);
+		accountImpl.createAccount(session);
 		memberInProjectImpl.syncMemberInProject(session);
 		projectImpl.syncProject(session);
 		workPackageImpl.syncWorkPackage(session);

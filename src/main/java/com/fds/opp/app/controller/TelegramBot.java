@@ -10,11 +10,11 @@ import java.util.List;
 
 public class TelegramBot extends TelegramLongPollingBot {
     public String getBotUsername() {
-        return "FDS Notification";
+        return "siriBot";
     }
 
     public String getBotToken() {
-        return "1457198760:AAE0y_ODocLo_j8Bj6hs7QqkqKvVhnXDA7o";
+        return "1442982441:AAHnizqKepZxQ9pQtAVifJ9Uj_RV6OWbWfY";
     }
 
     public void onUpdateReceived(Update update){
@@ -25,6 +25,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             message.setText(update.getMessage().getFrom().getFirstName());
         }
         message.setChatId(update.getMessage().getChatId());
+
+
+
         try {
             execute(message);
         } catch (TelegramApiException e) {
