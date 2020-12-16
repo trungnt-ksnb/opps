@@ -1,0 +1,11 @@
+version: "3.8"
+  db:
+    container_name: compose_db_1
+    image: postgres:10
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=p4ssw0rd
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=openproject
+    path:

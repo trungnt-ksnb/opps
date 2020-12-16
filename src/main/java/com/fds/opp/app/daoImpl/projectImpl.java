@@ -92,7 +92,7 @@ public class projectImpl {
             System.out.println("Syncing table Project ...");
             for (Project wp: listProject) {
                 session.beginTransaction();
-                session.saveOrUpdate(wp);
+                session.save(wp);
                 session.getTransaction().commit();
             }
         }

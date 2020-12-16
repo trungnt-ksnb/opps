@@ -92,7 +92,7 @@ public class workPackageImpl {
             System.out.println("Syncing table WorkPackage ...");
             for (WorkPackage wp: listWorkspace) {
                 session.beginTransaction();
-                session.saveOrUpdate(wp);
+                session.save(wp);
                 session.getTransaction().commit();
             }
         }

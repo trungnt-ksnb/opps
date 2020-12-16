@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.hibernate.Session;
 
-import com.fds.opp.app.hibernateUtil.HibernateUtils;
 import com.fds.opp.app.model.Account;
 import com.fds.opp.app.syncDatabase.AccountSync;
 import org.hibernate.SessionFactory;
