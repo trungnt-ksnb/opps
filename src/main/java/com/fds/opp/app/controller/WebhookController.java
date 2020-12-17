@@ -49,7 +49,13 @@ public class WebhookController {
             if (action.equals("project:created")) {
                 projectImpl.addProject(session, newProject);
                 session.close();
-                MessageContent += "Dự án " + newProject.getNameProject() + " được tạo!";
+                MessageContent += "Dự án " + newProject.getNameProject() + " được tạo! \n";
+//                if(!newProject.getDescriptionProject().equals("")){
+//                    MessageContent += "Mô tả dự án : " + newProject.getDescriptionProject() + "\n";
+//                }
+//                if(!newProject.getStatus().toString().equals("null") || newProject.getStatus() != null){
+//                    MessageContent += "Trạng thái dự án : " + newProject.getDescriptionProject() + "\n";
+//                }
             } else if (action.equals("project:updated")){
                 Project oldProject = (Project) session.get(Project.class, newProject.getIdProject());
                 if(oldProject.getNameProject().equals(newProject.getNameProject()) ){
@@ -281,11 +287,14 @@ public class WebhookController {
                         }
 
                     }
+
                 } else {
                     System.out.println("Không có sự thay đổi!");
                 }
+
             }
         }
+        TelegramBotAPI.callExec();
         return listMessage;
     }
 }

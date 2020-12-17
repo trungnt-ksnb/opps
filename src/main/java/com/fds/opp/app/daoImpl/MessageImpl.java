@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 @Transactional
@@ -36,6 +37,21 @@ public class MessageImpl {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
+    }
+    public static List<Message> readPendingListMessage(Session session){
+        try {
+            List<Message> listResult = new ArrayList<>();
+            List<Message> listMessage = session.createQuery("from Message", Message.class).getResultList();
+            for (Message message: listMessage) {
+                if(message.getStatus().equals("Pending...")){
+                    listResult.add(message);
+                }
+            }
+            return listResult;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }
