@@ -26,7 +26,6 @@ public class memberInProjectImpl {
         }
     }
     public static void addNewMemberInProject(Session session, MemberInProject memberInProject){
-        System.out.println("Creating Table Project...");
         session.beginTransaction();
         session.save(memberInProject);
         session.getTransaction().commit();
@@ -46,17 +45,10 @@ public class memberInProjectImpl {
             e.printStackTrace();
         }
     }
-    @Test
-    public void crud() throws Exception {
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        syncMemberInProject(session);
-        session.close();
-    }
+
     public static void update(Session session, MemberInProject memberUpdate)
     {
         try{
-            System.out.println("Updating Table Project...");
             MemberInProject memberInPorjectBefore = (MemberInProject) session.get(MemberInProject.class, memberUpdate.getIdMemberShip());
             memberInPorjectBefore.setIdMemberShip(memberUpdate.getIdMemberShip());
             memberInPorjectBefore.setNameUser(memberUpdate.getNameProject());
@@ -74,7 +66,6 @@ public class memberInProjectImpl {
     public static void delete(Session session, Integer idMemberInProject)
     {
         try{
-            System.out.println("Deleting Table Project...");
             MemberInProject objectToDelete = (MemberInProject) session.get(MemberInProject.class, idMemberInProject);
             session.beginTransaction();
             session.delete(objectToDelete);
@@ -89,7 +80,6 @@ public class memberInProjectImpl {
     {
         try
         {
-            System.out.println("Reading Database");
             List<MemberInProject> result = new ArrayList<>();
             List<MemberInProject> findMemberInProject = session.createQuery("from MemberInProject", MemberInProject.class).getResultList();
             for (MemberInProject memberInProject:findMemberInProject) {

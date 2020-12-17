@@ -14,13 +14,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OppsApplication {
 
 	public static void main(String[] args) throws Exception {
-		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-		Session session = sessionFactory.openSession();
-		accountImpl.createAccount(session);
-		memberInProjectImpl.syncMemberInProject(session);
-		projectImpl.syncProject(session);
-		workPackageImpl.syncWorkPackage(session);
-		session.close();
+//		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+//		Session session = sessionFactory.openSession();
+//		accountImpl.createAccount(session);
+//		memberInProjectImpl.syncMemberInProject(session);
+//		projectImpl.syncProject(session);
+//		workPackageImpl.syncWorkPackage(session);
+//		session.close();
 		SpringApplication.run(OppsApplication.class, args);
 	}
 

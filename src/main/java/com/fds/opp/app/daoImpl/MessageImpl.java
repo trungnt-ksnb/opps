@@ -16,7 +16,6 @@ import java.util.List;
 public class MessageImpl {
     public static void addNewMessage(Session session, Message message) {
         try {
-            System.out.println("Adding Table Message...");
             session.beginTransaction();
             session.save(message);
             session.getTransaction().commit();

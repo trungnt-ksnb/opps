@@ -12,7 +12,6 @@ import org.hibernate.Transaction;
 public class accountImpl {
 
     public static void createAccount(Session session) throws Exception {
-        System.out.println("create into database");
         List<Account> accList = AccountSync.getListAccountFromAPI();
         Transaction tx = null;
         try {

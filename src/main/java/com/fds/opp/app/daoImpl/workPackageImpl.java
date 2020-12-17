@@ -12,16 +12,9 @@ import java.util.List;
 
 @SpringBootApplication
 public class workPackageImpl {
-    @Test
-    public void crud() throws Exception {
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        syncWorkPackage(session);
-        session.close();
-    }
+
     public static void create(Session session) throws Exception {
         try {
-            System.out.println("Create table Workpackage...");
             List<WorkPackage> listWorkpackage = WorkPackageSync.getListWorkPackage();
             for (WorkPackage wp : listWorkpackage) {
                 session.beginTransaction();
@@ -48,22 +41,21 @@ public class workPackageImpl {
     public static void update(Session session, WorkPackage workPackage)
     {
         try {
-            System.out.println("Updating 1 value");
             WorkPackage wpUpdate = (WorkPackage) session.get(WorkPackage.class, workPackage.getIdWorkPackage());
-            wpUpdate.setNameWorkPackage(workPackage.getNameWorkPackage());
-            wpUpdate.setDescriptionWorkPackage(workPackage.getDescriptionWorkPackage());
-            wpUpdate.setStartDate(workPackage.getStartDate());
-            wpUpdate.setDueDate(workPackage.getDueDate());
-            wpUpdate.setDeadlineDate(workPackage.getDeadlineDate());
-            wpUpdate.setPriorityWorkPackage(workPackage.getPriorityWorkPackage());
-            wpUpdate.setStatusWorkPackage(workPackage.getStatusWorkPackage());
-            wpUpdate.setTypeWorkPackage(workPackage.getTypeWorkPackage());
-            wpUpdate.setNameProject(workPackage.getNameProject());
-            wpUpdate.setNameUser(workPackage.getNameUser());
-            wpUpdate.setAuthor(workPackage.getAuthor());
-            wpUpdate.setAccountable(workPackage.getAccountable());
+//            wpUpdate.setNameWorkPackage(workPackage.getNameWorkPackage());
+//            wpUpdate.setDescriptionWorkPackage(workPackage.getDescriptionWorkPackage());
+//            wpUpdate.setStartDate(workPackage.getStartDate());
+//            wpUpdate.setDueDate(workPackage.getDueDate());
+//            wpUpdate.setDeadlineDate(workPackage.getDeadlineDate());
+//            wpUpdate.setPriorityWorkPackage(workPackage.getPriorityWorkPackage());
+//            wpUpdate.setStatusWorkPackage(workPackage.getStatusWorkPackage());
+//            wpUpdate.setTypeWorkPackage(workPackage.getTypeWorkPackage());
+//            wpUpdate.setNameProject(workPackage.getNameProject());
+//            wpUpdate.setNameUser(workPackage.getNameUser());
+//            wpUpdate.setAuthor(workPackage.getAuthor());
+//            wpUpdate.setAccountable(workPackage.getAccountable());
             session.beginTransaction();
-            session.update(wpUpdate);
+            session.update(workPackage);
             session.getTransaction().commit();
         } catch (Exception e)
         {
@@ -74,7 +66,6 @@ public class workPackageImpl {
     public static void delete(Session session, Integer idWorkPackage)
     {
         try {
-            System.out.println("Deleting 1 value");
             WorkPackage wpDelete = (WorkPackage) session.get(WorkPackage.class, idWorkPackage);
             session.beginTransaction();
             session.delete(wpDelete);
@@ -89,7 +80,6 @@ public class workPackageImpl {
     {
         try {
             List<WorkPackage> listWorkspace = WorkPackageSync.getListWorkPackage();
-            System.out.println("Syncing table WorkPackage ...");
             for (WorkPackage wp: listWorkspace) {
                 session.beginTransaction();
                 session.save(wp);
