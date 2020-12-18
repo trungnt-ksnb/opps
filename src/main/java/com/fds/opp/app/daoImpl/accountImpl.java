@@ -8,7 +8,9 @@ import org.hibernate.Session;
 import java.sql.*;
 import com.fds.opp.app.model.Account;
 import com.fds.opp.app.syncDatabase.AccountSync;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 import org.junit.Test;
 
 
@@ -111,7 +113,17 @@ public class accountImpl {
 
     }
     @Test
-    public void getListCustomField(){
+    public void test(){
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        List<Account> listAccount = session.createQuery("From Account").getResultList();
+        session.close();
+        System.out.println(listAccount);
+        for (Account account: listAccount) {
+            System.out.println(account.getUsername());
+        }
+    }
+    public static List<CustomFields> getListCustomField(){
         String host="localhost";
         String port="5436";
         String dbname="openproject";
@@ -134,13 +146,37 @@ public class accountImpl {
                 listResult.add(customFields);
             }
             ret.close();
-            System.out.println("done.");
             for (CustomFields cf: listResult) {
                 System.out.println(cf.getValue());
             }
+            return listResult;
         }catch(SQLException ex){
             ex.printStackTrace();
+            return null;
         }
+    }
+    public static void SyncCustomField() throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        List<Account> accountList = session.createQuery("From Account").getResultList();
+        boolean status = false;
+//        session.close();
+        List<CustomFields> customFieldsList = getListCustomField();
+        for (Account account: accountList) {
+            status = false;
+            for (CustomFields customFields: customFieldsList) {
+                if(account.getIdUser() == customFields.getCustomized_id()){
+                    account.setCustomField(customFields.getValue());
+                    status = true;
+                    break;
+                }
+            }
+            if(status==true){
+                updateAccount(session, account);
+            }
+        }
+
+
     }
 
 }
