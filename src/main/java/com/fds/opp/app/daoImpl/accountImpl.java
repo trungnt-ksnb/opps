@@ -1,12 +1,15 @@
 package com.fds.opp.app.daoImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fds.opp.app.model.CustomFields;
 import org.hibernate.Session;
-
+import java.sql.*;
 import com.fds.opp.app.model.Account;
 import com.fds.opp.app.syncDatabase.AccountSync;
 import org.hibernate.Transaction;
+import org.junit.Test;
 
 
 public class accountImpl {
@@ -106,6 +109,38 @@ public class accountImpl {
             }
         }
 
+    }
+    @Test
+    public void getListCustomField(){
+        String host="localhost";
+        String port="5436";
+        String dbname="openproject";
+        String user="postgres";
+        String pass="p4ssw0rd";
+        String dburl = "jdbc:postgresql://"+host+":"+port+"/"+dbname+"?loggerLevel=OFF";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet ret = null;
+        List<CustomFields> listResult = new ArrayList<>();
+        try{
+            conn = DriverManager.getConnection(dburl, user, pass);
+            pstmt = conn.prepareStatement("select * from custom_values where customized_type = 'Principal';");
+            ret = pstmt.executeQuery();
+            while(ret.next()){
+                CustomFields customFields = new CustomFields();
+                customFields.setId(ret.getInt("id"));
+                customFields.setCustomized_id(ret.getInt("customized_id"));
+                customFields.setValue(ret.getString("value"));
+                listResult.add(customFields);
+            }
+            ret.close();
+            System.out.println("done.");
+            for (CustomFields cf: listResult) {
+                System.out.println(cf.getValue());
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
     }
 
 }
