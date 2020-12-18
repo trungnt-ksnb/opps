@@ -1,12 +1,17 @@
 package com.fds.opp.app.daoImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fds.opp.app.model.CustomFields;
 import org.hibernate.Session;
-
+import java.sql.*;
 import com.fds.opp.app.model.Account;
 import com.fds.opp.app.syncDatabase.AccountSync;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.junit.Test;
 
 
 public class accountImpl {
@@ -105,6 +110,72 @@ public class accountImpl {
                 tx.rollback();
             }
         }
+
+    }
+    @Test
+    public void test(){
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        List<Account> listAccount = session.createQuery("From Account").getResultList();
+        session.close();
+        System.out.println(listAccount);
+        for (Account account: listAccount) {
+            System.out.println(account.getUsername());
+        }
+    }
+    public static List<CustomFields> getListCustomField(){
+        String host="localhost";
+        String port="5436";
+        String dbname="openproject";
+        String user="postgres";
+        String pass="p4ssw0rd";
+        String dburl = "jdbc:postgresql://"+host+":"+port+"/"+dbname+"?loggerLevel=OFF";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet ret = null;
+        List<CustomFields> listResult = new ArrayList<>();
+        try{
+            conn = DriverManager.getConnection(dburl, user, pass);
+            pstmt = conn.prepareStatement("select * from custom_values where customized_type = 'Principal';");
+            ret = pstmt.executeQuery();
+            while(ret.next()){
+                CustomFields customFields = new CustomFields();
+                customFields.setId(ret.getInt("id"));
+                customFields.setCustomized_id(ret.getInt("customized_id"));
+                customFields.setValue(ret.getString("value"));
+                listResult.add(customFields);
+            }
+            ret.close();
+            for (CustomFields cf: listResult) {
+                System.out.println(cf.getValue());
+            }
+            return listResult;
+        }catch(SQLException ex){
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public static void SyncCustomField() throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        List<Account> accountList = session.createQuery("From Account").getResultList();
+        boolean status = false;
+//        session.close();
+        List<CustomFields> customFieldsList = getListCustomField();
+        for (Account account: accountList) {
+            status = false;
+            for (CustomFields customFields: customFieldsList) {
+                if(account.getIdUser() == customFields.getCustomized_id()){
+                    account.setCustomField(customFields.getValue());
+                    status = true;
+                    break;
+                }
+            }
+            if(status==true){
+                updateAccount(session, account);
+            }
+        }
+
 
     }
 

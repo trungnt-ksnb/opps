@@ -1,5 +1,6 @@
 package com.fds.opp.app;
 
+import com.fds.opp.app.controller.RunBot;
 import com.fds.opp.app.daoImpl.accountImpl;
 import com.fds.opp.app.daoImpl.memberInProjectImpl;
 import com.fds.opp.app.daoImpl.projectImpl;
@@ -14,13 +15,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OppsApplication {
 
 	public static void main(String[] args) throws Exception {
-		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-		Session session = sessionFactory.openSession();
-		accountImpl.createAccount(session);
-		memberInProjectImpl.syncMemberInProject(session);
-		projectImpl.syncProject(session);
-		workPackageImpl.syncWorkPackage(session);
-		session.close();
+//		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+//		Session session = sessionFactory.openSession();
+//		accountImpl.createAccount(session);
+//		memberInProjectImpl.syncMemberInProject(session);
+//		projectImpl.syncProject(session);
+//		workPackageImpl.syncWorkPackage(session);
+//		session.close();
+		RunBot runBot = new RunBot();
+		runBot.main();
 		SpringApplication.run(OppsApplication.class, args);
 	}
 
