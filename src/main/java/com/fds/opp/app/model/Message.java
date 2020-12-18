@@ -13,7 +13,7 @@ public class Message {
     private String nameUser;
     @Column(name = "role")
     private String role;
-    @Column(name = "Message")
+    @Column(name = "Message", length = 500)
     private String Message;
     @Column(name="status")
     private String status;

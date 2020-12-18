@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.telegram.telegrambots.ApiContextInitializer;
-import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,15 +27,14 @@ import java.util.List;
 @RequestMapping("/api/v3/telegram/notify")
 public class WebhookController {
     @PostMapping("/create")
-    public List<com.fds.opp.app.model.Message> newRequest(@RequestBody String JsonString) throws Exception
-    {
+    public List<com.fds.opp.app.model.Message> newRequest(@RequestBody String JsonString) throws Exception {
         List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
         JSONObject request = new JSONObject(JsonString);
         String action = request.get("action").toString();
         String MessageContent = "";
-        if(action.equals("project:created") || action.equals("project:updated")){
+        if (action.equals("project:created") || action.equals("project:updated")) {
             Project newProject = new Project();
             JSONObject project = new JSONObject(request.get("project").toString());
             newProject.setIdProject(project.getInt("id"));
@@ -49,31 +45,26 @@ public class WebhookController {
             if (action.equals("project:created")) {
                 projectImpl.addProject(session, newProject);
                 session.close();
-                MessageContent += "Dự án " + newProject.getNameProject() + " được tạo! \n";
-//                if(!newProject.getDescriptionProject().equals("")){
-//                    MessageContent += "Mô tả dự án : " + newProject.getDescriptionProject() + "\n";
-//                }
-//                if(!newProject.getStatus().toString().equals("null") || newProject.getStatus() != null){
-//                    MessageContent += "Trạng thái dự án : " + newProject.getDescriptionProject() + "\n";
-//                }
-            } else if (action.equals("project:updated")){
-                Project oldProject = (Project) session.get(Project.class, newProject.getIdProject());
-                if(oldProject.getNameProject().equals(newProject.getNameProject()) ){
+//                MessageContent += "Dự án " + newProject.getNameProject() + " được tạo! \n";
+            } else if (action.equals("project:updated")) {
+                Project oldProject = session.get(Project.class, newProject.getIdProject());
+                if (oldProject.getNameProject().equals(newProject.getNameProject())) {
                     MessageContent += "Tên Dự Án được thay đổi: "
                             + oldProject.getNameProject() + " -> "
                             + newProject.getNameProject() + "\n";
-                } else if(oldProject.getDescriptionProject().equals(newProject.getDescriptionProject())){
+                } else if (oldProject.getDescriptionProject().equals(newProject.getDescriptionProject())) {
                     MessageContent += "Mô Tả Dự Án được thay đổi: "
                             + oldProject.getDescriptionProject() + " -> "
                             + newProject.getDescriptionProject() + "\n";
-                } else if(oldProject.getStatus().equals(newProject.getStatus())){
+                } else if (oldProject.getStatus().equals(newProject.getStatus())) {
                     MessageContent += "Trạng Thái Dự Án được thay đổi: "
                             + oldProject.getStatus() + " -> "
                             + newProject.getStatus() + "\n";
                 }
                 memberInProjectImpl.syncMemberInProject(session);
                 List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, oldProject.getNameProject());
-                for (MemberInProject eachMember: memberInProjects) {
+                assert memberInProjects != null;
+                for (MemberInProject eachMember : memberInProjects) {
                     com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
                     MessageObj.setNameUser(eachMember.getNameUser());
                     MessageObj.setRole(eachMember.getRoles());
@@ -83,7 +74,7 @@ public class WebhookController {
             } else {
                 System.out.println("Lỗi Package!! ");
             }
-        } else if(action.equals("work_package:created") || action.equals("work_package:updated")){
+        } else if (action.equals("work_package:created") || action.equals("work_package:updated")) {
             WorkPackage newWorkPackage = new WorkPackage();
             JSONObject work_package = new JSONObject(request.get("work_package").toString());
             newWorkPackage.setIdWorkPackage(work_package.getInt("id"));
@@ -94,23 +85,23 @@ public class WebhookController {
             String startDateString = work_package.get("startDate").toString();
             String dueDateString = work_package.get("dueDate").toString();
             String deadlineDateString = "2020-12-12";
-            SimpleDateFormat formatter1=new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd");
             Date startDate, dueDate, deadlineDate;
-            if(startDateString.equals("null") || startDateString.equals("")) {
+            if (startDateString.equals("null") || startDateString.equals("")) {
                 startDate = null;
-            } else{
+            } else {
                 startDate = formatter1.parse(startDateString);
             }
             newWorkPackage.setStartDate(startDate);
-            if(dueDateString.equals("null") || dueDateString.equals("")) {
+            if (dueDateString.equals("null") || dueDateString.equals("")) {
                 dueDate = null;
-            } else{
+            } else {
                 dueDate = formatter1.parse(dueDateString);
             }
             newWorkPackage.setDueDate(dueDate);
-            if(deadlineDateString.equals("null") || deadlineDateString.equals("")) {
+            if (deadlineDateString.equals("null") || deadlineDateString.equals("")) {
                 deadlineDate = null;
-            } else{
+            } else {
                 deadlineDate = formatter1.parse(deadlineDateString);
             }
             newWorkPackage.setDeadlineDate(deadlineDate);
@@ -124,16 +115,16 @@ public class WebhookController {
             JSONObject _links = new JSONObject(work_package.get("_links").toString());
             JSONObject assignJS = new JSONObject(_links.get("assignee").toString());
             String assignee = _links.get("assignee").toString();
-            String assigneeString = "";
-            if(assignee.equals("{\"href\":null}")){
+            String assigneeString;
+            if (assignee.equals("{\"href\":null}")) {
                 assigneeString = "null";
             } else {
                 assigneeString = assignJS.get("title").toString();
             }
             JSONObject responsibleJS = new JSONObject(_links.get("responsible").toString());
             String responsible = _links.get("responsible").toString();
-            String responsibleString = "";
-            if(responsible.equals("{\"href\":null}")){
+            String responsibleString;
+            if (responsible.equals("{\"href\":null}")) {
                 responsibleString = "null";
             } else {
                 responsibleString = responsibleJS.get("title").toString();
@@ -144,31 +135,31 @@ public class WebhookController {
             newWorkPackage.setAuthor(author.get("name").toString());
             JSONObject type = new JSONObject(_embedded.get("type").toString());
             newWorkPackage.setTypeWorkPackage(type.get("name").toString());
-            if(action.equals("work_package:created")){
+            if (action.equals("work_package:created")) {
                 session = sessionFactory.openSession();
                 workPackageImpl.addWorkPackage(session, newWorkPackage);
                 session.close();
-                if(!newWorkPackage.getNameWorkPackage().equals("")){
+                if (!newWorkPackage.getNameWorkPackage().equals("")) {
                     MessageContent += "Tên CV được tạo : " + newWorkPackage.getNameWorkPackage() + "\n";
                 }
-                if(!newWorkPackage.getDescriptionWorkPackage().equals("")){
+                if (!newWorkPackage.getDescriptionWorkPackage().equals("")) {
                     MessageContent += "Mô tả CV : " + newWorkPackage.getDescriptionWorkPackage() + "\n";
                 }
                 if (newWorkPackage.getStartDate() != null ||
                         newWorkPackage.getDueDate() != null ||
                         newWorkPackage.getDeadlineDate() != null) {
                     MessageContent += "Thời gian CV : "
-                            + newWorkPackage.getStartDate() + " - "
-                            + newWorkPackage.getDueDate() + "\n Deadline : "
-                            + newWorkPackage.getDeadlineDate() + "\n";
+                            + newWorkPackage.getStartDate().toString() + " - "
+                            + newWorkPackage.getDueDate().toString() + "\n Deadline : "
+                            + newWorkPackage.getDeadlineDate().toString() + "\n";
                 }
-                if(!newWorkPackage.getNameUser().equals("null") || !newWorkPackage.getAccountable().equals("null")){
+                if (!newWorkPackage.getNameUser().equals("null") || !newWorkPackage.getAccountable().equals("null")) {
                     session = sessionFactory.openSession();
                     memberInProjectImpl.syncMemberInProject(session);
                     List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
                     session.close();
-                    for (MemberInProject mip: memberInProjects) {
-                        if(mip.getNameUser().equals(newWorkPackage.getNameUser())){
+                    for (MemberInProject mip : memberInProjects) {
+                        if (mip.getNameUser().equals(newWorkPackage.getNameUser())) {
                             MessageContent += "Bạn đã được assign cho công việc : "
                                     + newWorkPackage.getIdWorkPackage() + " : "
                                     + newWorkPackage.getNameWorkPackage();
@@ -181,7 +172,8 @@ public class WebhookController {
                             session = sessionFactory.openSession();
                             MessageImpl.addNewMessage(session, newMessage);
                             session.close();
-                        } else if(mip.getNameUser().equals(newWorkPackage.getAccountable())){
+                        }
+                        if (mip.getNameUser().equals(newWorkPackage.getAccountable())) {
                             MessageContent += "Bạn đã được accountable cho công việc : "
                                     + newWorkPackage.getIdWorkPackage() + " : "
                                     + newWorkPackage.getNameWorkPackage();
@@ -194,7 +186,8 @@ public class WebhookController {
                             session = sessionFactory.openSession();
                             MessageImpl.addNewMessage(session, newMessage);
                             session.close();
-                        } else if(mip.getRoles().equals("Project admin")){
+                        }
+                        if (mip.getRoles().equals("Project admin")) {
                             MessageContent += "Bạn đã tạo công việc : "
                                     + newWorkPackage.getIdWorkPackage() + " : "
                                     + newWorkPackage.getNameWorkPackage();
@@ -207,75 +200,95 @@ public class WebhookController {
                             session = sessionFactory.openSession();
                             MessageImpl.addNewMessage(session, newMessage);
                             session.close();
+                        } else {
+                            System.out.println("Không gửi : " + mip.getNameUser());
                         }
                     }
                 }
-            }else if(action.equals("work_package:updated")){
+            } else if (action.equals("work_package:updated")) {
                 WorkPackage oldWorkPackage = session.get(WorkPackage.class, newWorkPackage.getIdWorkPackage());
-                if(!oldWorkPackage.getNameWorkPackage().equals(newWorkPackage.getNameWorkPackage())){
+                if (!oldWorkPackage.getNameWorkPackage().equals(newWorkPackage.getNameWorkPackage())) {
                     MessageContent += "Tên CV được cập nhật : "
                             + oldWorkPackage.getNameWorkPackage() + " -> "
                             + newWorkPackage.getNameWorkPackage() + "\n";
                 }
-                if(!oldWorkPackage.getDescriptionWorkPackage().equals(newWorkPackage.getDescriptionWorkPackage())){
+                if (!oldWorkPackage.getDescriptionWorkPackage().equals(newWorkPackage.getDescriptionWorkPackage())) {
                     MessageContent += "Mô tả CV được cập nhật : "
                             + oldWorkPackage.getDescriptionWorkPackage() + " -> "
-                            +  newWorkPackage.getDescriptionWorkPackage() + "\n";
+                            + newWorkPackage.getDescriptionWorkPackage() + "\n";
                 }
-                if(oldWorkPackage.getStartDate() == null ||
+                if (oldWorkPackage.getStartDate() == null ||
                         oldWorkPackage.getDueDate() == null ||
-                        oldWorkPackage.getDeadlineDate() == null){
-                    if(newWorkPackage.getStartDate() == null ||
+                        oldWorkPackage.getDeadlineDate() == null) {
+                    if (newWorkPackage.getStartDate() == null ||
                             newWorkPackage.getDueDate() == null ||
                             newWorkPackage.getDeadlineDate() == null) {
                         System.out.println("Null - !=Null");
-                    } else{
+                    } else {
                         MessageContent += "Thời gian CV "
-                                + newWorkPackage.getNameWorkPackage() +" được cập nhật : "
+                                + newWorkPackage.getNameWorkPackage() + " được cập nhật : "
                                 + newWorkPackage.getStartDate() + " - "
                                 + newWorkPackage.getDueDate() + "\n Deadline : "
-                                + newWorkPackage.getDeadlineDate()+ "\n";
+                                + newWorkPackage.getDeadlineDate() + "\n";
                         System.out.println("Thời gian CV "
-                                + newWorkPackage.getNameWorkPackage() +" : được cập nhật : "
+                                + newWorkPackage.getNameWorkPackage() + " : được cập nhật : "
                                 + newWorkPackage.getStartDate() + " - "
                                 + newWorkPackage.getDueDate() + "\n Deadline : "
                                 + newWorkPackage.getDeadlineDate() + "\n");
                     }
-                } else if(oldWorkPackage.getStartDate().compareTo(newWorkPackage.getStartDate())!=0 ||
-                        oldWorkPackage.getDueDate().compareTo(newWorkPackage.getDueDate())!=0  ||
-                        oldWorkPackage.getDeadlineDate().compareTo(newWorkPackage.getDeadlineDate())!=0){
+                } else if (oldWorkPackage.getStartDate().compareTo(newWorkPackage.getStartDate()) != 0 ||
+                        oldWorkPackage.getDueDate().compareTo(newWorkPackage.getDueDate()) != 0 ||
+                        oldWorkPackage.getDeadlineDate().compareTo(newWorkPackage.getDeadlineDate()) != 0) {
                     MessageContent += "Thời gian CV : "
-                            + newWorkPackage.getNameWorkPackage() +" được cập nhật : "
+                            + newWorkPackage.getNameWorkPackage() + " được cập nhật : "
                             + newWorkPackage.getStartDate() + " - "
                             + newWorkPackage.getDueDate() + "\n Deadline : "
                             + newWorkPackage.getDeadlineDate() + "\n";
                     System.out.println("123");
                 }
-                if(!oldWorkPackage.getPriorityWorkPackage().equals(newWorkPackage.getPriorityWorkPackage())){
-                    MessageContent += "Mức độ ưu tiên CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
+                if (!oldWorkPackage.getPriorityWorkPackage().equals(newWorkPackage.getPriorityWorkPackage())) {
+                    MessageContent += "Mức độ ưu tiên CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
                 }
-                if(!oldWorkPackage.getStatusWorkPackage().equals(newWorkPackage.getStatusWorkPackage())){
-                    MessageContent += "Trạng Thái CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
+                if (!oldWorkPackage.getStatusWorkPackage().equals(newWorkPackage.getStatusWorkPackage())) {
+                    MessageContent += "Trạng Thái CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
                 }
-                if(!oldWorkPackage.getTypeWorkPackage().equals(newWorkPackage.getTypeWorkPackage())){
-                    MessageContent += "Loại CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
+                if (!oldWorkPackage.getTypeWorkPackage().equals(newWorkPackage.getTypeWorkPackage())) {
+                    MessageContent += "Loại CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
                 }
-                if(!oldWorkPackage.getNameUser().equals(newWorkPackage.getNameUser())){
-                    MessageContent += "Người thực hiện CV "+ newWorkPackage.getNameWorkPackage() +"được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
+                if (!oldWorkPackage.getNameUser().equals(newWorkPackage.getNameUser())) {
+                    MessageContent += "Người thực hiện CV " + newWorkPackage.getNameWorkPackage() + "được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
                 }
                 workPackageImpl.update(session, newWorkPackage);
                 session.close();
-                if (!MessageContent.equals("")){
+                if (!MessageContent.equals("")) {
                     session = sessionFactory.openSession();
                     memberInProjectImpl.syncMemberInProject(session);
                     List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
                     session.close();
-                    for (MemberInProject eachMember: memberInProjects) {
-                        if(!eachMember.getNameUser().equals(ActivitesAuthor) ||
-                                eachMember.getRoles().equals("Project admin") ||
-                                eachMember.getNameUser().equals(newWorkPackage.getAccountable()) ||
-                                eachMember.getNameUser().equals(newWorkPackage.getNameUser()))
-                        {
+                    for (MemberInProject eachMember : memberInProjects) {
+                        if (eachMember.getNameUser().equals(newWorkPackage.getAccountable())) {
+                            Message MessageObj = new Message();
+                            MessageObj.setNameUser(eachMember.getNameUser());
+                            MessageObj.setRole(eachMember.getRoles());
+                            MessageObj.setMessage(MessageContent);
+                            MessageObj.setStatus("Pending...");
+                            listMessage.add(MessageObj);
+                            session = sessionFactory.openSession();
+                            MessageImpl.addNewMessage(session, MessageObj);
+                            session.close();
+                        }
+                        if (eachMember.getNameUser().equals(newWorkPackage.getNameUser())) {
+                            Message MessageObj = new Message();
+                            MessageObj.setNameUser(eachMember.getNameUser());
+                            MessageObj.setRole(eachMember.getRoles());
+                            MessageObj.setMessage(MessageContent);
+                            MessageObj.setStatus("Pending...");
+                            listMessage.add(MessageObj);
+                            session = sessionFactory.openSession();
+                            MessageImpl.addNewMessage(session, MessageObj);
+                            session.close();
+                        }
+                        if (eachMember.getRoles().equals("Project admin")) {
                             Message MessageObj = new Message();
                             MessageObj.setNameUser(eachMember.getNameUser());
                             MessageObj.setRole(eachMember.getRoles());
@@ -298,6 +311,7 @@ public class WebhookController {
             }
         }
         TelegramBotAPI.callExec();
+        System.gc();
         return listMessage;
     }
 }
