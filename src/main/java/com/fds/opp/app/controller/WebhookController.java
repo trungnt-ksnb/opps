@@ -230,11 +230,13 @@ public class WebhookController {
                             newWorkPackage.getDeadlineDate() == null) {
                         System.out.println("Null - !=Null");
                     } else{
-                        MessageContent += "Thời gian CV được cập nhật : "
+                        MessageContent += "Thời gian CV "
+                                + newWorkPackage.getNameWorkPackage() +" được cập nhật : "
                                 + newWorkPackage.getStartDate() + " - "
                                 + newWorkPackage.getDueDate() + "\n Deadline : "
                                 + newWorkPackage.getDeadlineDate()+ "\n";
-                        System.out.println("Thời gian CV được cập nhật : "
+                        System.out.println("Thời gian CV "
+                                + newWorkPackage.getNameWorkPackage() +" : được cập nhật : "
                                 + newWorkPackage.getStartDate() + " - "
                                 + newWorkPackage.getDueDate() + "\n Deadline : "
                                 + newWorkPackage.getDeadlineDate() + "\n");
@@ -242,23 +244,24 @@ public class WebhookController {
                 } else if(oldWorkPackage.getStartDate().compareTo(newWorkPackage.getStartDate())!=0 ||
                         oldWorkPackage.getDueDate().compareTo(newWorkPackage.getDueDate())!=0  ||
                         oldWorkPackage.getDeadlineDate().compareTo(newWorkPackage.getDeadlineDate())!=0){
-                    MessageContent += "Thời gian CV được cập nhật : "
+                    MessageContent += "Thời gian CV : "
+                            + newWorkPackage.getNameWorkPackage() +" được cập nhật : "
                             + newWorkPackage.getStartDate() + " - "
                             + newWorkPackage.getDueDate() + "\n Deadline : "
                             + newWorkPackage.getDeadlineDate() + "\n";
                     System.out.println("123");
                 }
                 if(!oldWorkPackage.getPriorityWorkPackage().equals(newWorkPackage.getPriorityWorkPackage())){
-                    MessageContent += "Mức độ ưu tiên CV được cập nhật: " + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
+                    MessageContent += "Mức độ ưu tiên CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
                 }
                 if(!oldWorkPackage.getStatusWorkPackage().equals(newWorkPackage.getStatusWorkPackage())){
-                    MessageContent += "Trạng Thái CV được cập nhật: " + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
+                    MessageContent += "Trạng Thái CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
                 }
                 if(!oldWorkPackage.getTypeWorkPackage().equals(newWorkPackage.getTypeWorkPackage())){
-                    MessageContent += "Loại CV được cập nhật: " + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
+                    MessageContent += "Loại CV "+ newWorkPackage.getNameWorkPackage() +" được cập nhật: " + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
                 }
                 if(!oldWorkPackage.getNameUser().equals(newWorkPackage.getNameUser())){
-                    MessageContent += "Người thực hiện CV được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
+                    MessageContent += "Người thực hiện CV "+ newWorkPackage.getNameWorkPackage() +"được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
                 }
                 workPackageImpl.update(session, newWorkPackage);
                 session.close();
