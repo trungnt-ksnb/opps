@@ -8,6 +8,10 @@ import org.hibernate.cfg.Configuration;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @SpringBootApplication
@@ -90,5 +94,15 @@ public class workPackageImpl {
         {
             e.printStackTrace();
         }
+    }
+    public static String DateString(String dateString) throws Exception{
+        String dateStr = dateString;
+        DateFormat formatter = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
+        Date date = (Date)formatter.parse(dateStr);
+        System.out.println(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        String formatedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" +         cal.get(Calendar.YEAR);
+        return formatedDate;
     }
 }

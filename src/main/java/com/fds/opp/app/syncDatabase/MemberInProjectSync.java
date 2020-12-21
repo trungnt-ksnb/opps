@@ -1,5 +1,6 @@
 package com.fds.opp.app.syncDatabase;
 
+import com.fds.opp.app.controller.ReadConfig;
 import com.fds.opp.app.model.MemberInProject;
 import com.fds.opp.app.model.WorkPackage;
 import org.json.JSONArray;
@@ -19,9 +20,9 @@ public class MemberInProjectSync {
         List<MemberInProject> listMemberInProject = new ArrayList<>();
         int count;
         do {
-            String url = "http://localhost:8080/api/v3/memberships/?offset=" + offset;
-            String user = "apikey";
-            String key = "86c12665ab843cb3f96690c7c53554adbfc95cf1544f0ece2519f269860488ab";
+            String url = ReadConfig.readKey("urlapimemberinproject") + offset;
+            String user = ReadConfig.readKey("userapi");
+            String key = ReadConfig.readKey("keyapi");
             String auth = user + ":" + key;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());;
             URL obj = new URL(url);
@@ -70,8 +71,5 @@ public class MemberInProjectSync {
         } while(count != 0);
         return listMemberInProject;
     }
-    @Test
-    public void crud() throws Exception{
-        System.out.println(getListMemberInProject());
-    }
+
 }

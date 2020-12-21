@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -34,6 +32,8 @@ public class WebhookController {
         JSONObject request = new JSONObject(JsonString);
         String action = request.get("action").toString();
         String MessageContent = "";
+        Locale localeEn = new Locale("vi");
+        ResourceBundle labels = ResourceBundle.getBundle("messages", localeEn);
         if (action.equals("project:created") || action.equals("project:updated")) {
             Project newProject = new Project();
             JSONObject project = new JSONObject(request.get("project").toString());
@@ -45,19 +45,18 @@ public class WebhookController {
             if (action.equals("project:created")) {
                 projectImpl.addProject(session, newProject);
                 session.close();
-//                MessageContent += "Dự án " + newProject.getNameProject() + " được tạo! \n";
             } else if (action.equals("project:updated")) {
                 Project oldProject = session.get(Project.class, newProject.getIdProject());
                 if (oldProject.getNameProject().equals(newProject.getNameProject())) {
-                    MessageContent += "Tên Dự Án được thay đổi: "
+                    MessageContent += labels.getString("projectNameUpdated")
                             + oldProject.getNameProject() + " -> "
                             + newProject.getNameProject() + "\n";
                 } else if (oldProject.getDescriptionProject().equals(newProject.getDescriptionProject())) {
-                    MessageContent += "Mô Tả Dự Án được thay đổi: "
+                    MessageContent += labels.getString("projectDescriptionupdated")
                             + oldProject.getDescriptionProject() + " -> "
                             + newProject.getDescriptionProject() + "\n";
                 } else if (oldProject.getStatus().equals(newProject.getStatus())) {
-                    MessageContent += "Trạng Thái Dự Án được thay đổi: "
+                    MessageContent += labels.getString("projectStatusUpdated")
                             + oldProject.getStatus() + " -> "
                             + newProject.getStatus() + "\n";
                 }
@@ -140,18 +139,18 @@ public class WebhookController {
                 workPackageImpl.addWorkPackage(session, newWorkPackage);
                 session.close();
                 if (!newWorkPackage.getNameWorkPackage().equals("")) {
-                    MessageContent += "Tên CV được tạo : " + newWorkPackage.getNameWorkPackage() + "\n";
+                    MessageContent += labels.getString("workpackageNameCreated") + newWorkPackage.getNameWorkPackage() + "\n";
                 }
                 if (!newWorkPackage.getDescriptionWorkPackage().equals("")) {
-                    MessageContent += "Mô tả CV : " + newWorkPackage.getDescriptionWorkPackage() + "\n";
+                    MessageContent += labels.getString("workpackageDescriptionCreated") + newWorkPackage.getDescriptionWorkPackage() + "\n";
                 }
                 if (newWorkPackage.getStartDate() != null ||
                         newWorkPackage.getDueDate() != null ||
                         newWorkPackage.getDeadlineDate() != null) {
-                    MessageContent += "Thời gian CV : "
-                            + newWorkPackage.getStartDate().toString() + " - "
-                            + newWorkPackage.getDueDate().toString() + "\n Deadline : "
-                            + newWorkPackage.getDeadlineDate().toString() + "\n";
+                    MessageContent += labels.getString("workpackageTimeCreated")
+                            + workPackageImpl.DateString(newWorkPackage.getStartDate().toString()) + " - "
+                            + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
+                            + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
                 }
                 if (!newWorkPackage.getNameUser().equals("null") || !newWorkPackage.getAccountable().equals("null")) {
                     session = sessionFactory.openSession();
@@ -160,9 +159,9 @@ public class WebhookController {
                     session.close();
                     for (MemberInProject mip : memberInProjects) {
                         if (mip.getNameUser().equals(newWorkPackage.getNameUser())) {
-                            MessageContent += "Bạn đã được assign cho công việc : "
+                            MessageContent += labels.getString("workpackageAssigneeCreated")
                                     + newWorkPackage.getIdWorkPackage() + " : "
-                                    + newWorkPackage.getNameWorkPackage();
+                                    + newWorkPackage.getNameWorkPackage() + "\n";
                             Message newMessage = new Message();
                             newMessage.setNameUser(mip.getNameUser());
                             newMessage.setRole(mip.getRoles());
@@ -174,9 +173,9 @@ public class WebhookController {
                             session.close();
                         }
                         if (mip.getNameUser().equals(newWorkPackage.getAccountable())) {
-                            MessageContent += "Bạn đã được accountable cho công việc : "
+                            MessageContent += labels.getString("workpackageAccountableCreated")
                                     + newWorkPackage.getIdWorkPackage() + " : "
-                                    + newWorkPackage.getNameWorkPackage();
+                                    + newWorkPackage.getNameWorkPackage() + "\n";
                             Message newMessage = new Message();
                             newMessage.setNameUser(mip.getNameUser());
                             newMessage.setRole(mip.getRoles());
@@ -188,7 +187,7 @@ public class WebhookController {
                             session.close();
                         }
                         if (mip.getRoles().equals("Project admin")) {
-                            MessageContent += "Bạn đã tạo công việc : "
+                            MessageContent += labels.getString("workpackageMessageForAdmin")
                                     + newWorkPackage.getIdWorkPackage() + " : "
                                     + newWorkPackage.getNameWorkPackage();
                             Message newMessage = new Message();
@@ -208,12 +207,12 @@ public class WebhookController {
             } else if (action.equals("work_package:updated")) {
                 WorkPackage oldWorkPackage = session.get(WorkPackage.class, newWorkPackage.getIdWorkPackage());
                 if (!oldWorkPackage.getNameWorkPackage().equals(newWorkPackage.getNameWorkPackage())) {
-                    MessageContent += "Tên CV được cập nhật : "
+                    MessageContent += labels.getString("workpackageNameUpdated")
                             + oldWorkPackage.getNameWorkPackage() + " -> "
                             + newWorkPackage.getNameWorkPackage() + "\n";
                 }
                 if (!oldWorkPackage.getDescriptionWorkPackage().equals(newWorkPackage.getDescriptionWorkPackage())) {
-                    MessageContent += "Mô tả CV được cập nhật : "
+                    MessageContent += labels.getString("workpackageDescriptionUpdated")
                             + oldWorkPackage.getDescriptionWorkPackage() + " -> "
                             + newWorkPackage.getDescriptionWorkPackage() + "\n";
                 }
@@ -225,39 +224,37 @@ public class WebhookController {
                             newWorkPackage.getDeadlineDate() == null) {
                         System.out.println("Null - !=Null");
                     } else {
-                        MessageContent += "Thời gian CV "
-                                + newWorkPackage.getNameWorkPackage() + " được cập nhật : "
-                                + newWorkPackage.getStartDate() + " - "
-                                + newWorkPackage.getDueDate() + "\n Deadline : "
-                                + newWorkPackage.getDeadlineDate() + "\n";
-                        System.out.println("Thời gian CV "
-                                + newWorkPackage.getNameWorkPackage() + " : được cập nhật : "
-                                + newWorkPackage.getStartDate() + " - "
-                                + newWorkPackage.getDueDate() + "\n Deadline : "
-                                + newWorkPackage.getDeadlineDate() + "\n");
+                        MessageContent += labels.getString("workpackageTimeUpdated1")
+                                + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated")
+                                + workPackageImpl.DateString(newWorkPackage.getStartDate().toString()) + " - "
+                                + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
+                                + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
                     }
                 } else if (oldWorkPackage.getStartDate().compareTo(newWorkPackage.getStartDate()) != 0 ||
                         oldWorkPackage.getDueDate().compareTo(newWorkPackage.getDueDate()) != 0 ||
                         oldWorkPackage.getDeadlineDate().compareTo(newWorkPackage.getDeadlineDate()) != 0) {
-                    MessageContent += "Thời gian CV : "
-                            + newWorkPackage.getNameWorkPackage() + " được cập nhật : "
-                            + newWorkPackage.getStartDate() + " - "
-                            + newWorkPackage.getDueDate() + "\n Deadline : "
-                            + newWorkPackage.getDeadlineDate() + "\n";
-                    System.out.println("123");
+                    MessageContent += labels.getString("workpackageTimeUpdated1")
+                            + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated")
+                            + workPackageImpl.DateString(newWorkPackage.getStartDate().toString()) + " - "
+                            + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
+                            + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
                 }
                 if (!oldWorkPackage.getPriorityWorkPackage().equals(newWorkPackage.getPriorityWorkPackage())) {
-                    MessageContent += "Mức độ ưu tiên CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
+                    MessageContent += labels.getString("worpackagePriorityUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
                 }
                 if (!oldWorkPackage.getStatusWorkPackage().equals(newWorkPackage.getStatusWorkPackage())) {
-                    MessageContent += "Trạng Thái CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
+                    MessageContent += labels.getString("workpackageStatusUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getStatusWorkPackage() + " -> " + newWorkPackage.getStatusWorkPackage() + "\n";
                 }
                 if (!oldWorkPackage.getTypeWorkPackage().equals(newWorkPackage.getTypeWorkPackage())) {
-                    MessageContent += "Loại CV " + newWorkPackage.getNameWorkPackage() + " được cập nhật: " + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
+                    MessageContent += labels.getString("workpackageTypeUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getTypeWorkPackage() + " -> " + newWorkPackage.getTypeWorkPackage() + "\n";
                 }
                 if (!oldWorkPackage.getNameUser().equals(newWorkPackage.getNameUser())) {
-                    MessageContent += "Người thực hiện CV " + newWorkPackage.getNameWorkPackage() + "được cập nhật: " + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
+                    MessageContent += labels.getString("workpackageAsigneeUpdated")+ newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
                 }
+                if (!oldWorkPackage.getAccountable().equals(newWorkPackage.getAccountable())) {
+                    MessageContent += labels.getString("workpackageAccountableUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
+                }
+
                 workPackageImpl.update(session, newWorkPackage);
                 session.close();
                 if (!MessageContent.equals("")) {
@@ -311,7 +308,8 @@ public class WebhookController {
             }
         }
         TelegramBotAPI.callExec();
-        System.gc();
+//        System.gc();
         return listMessage;
     }
+
 }

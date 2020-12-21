@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fds.opp.app.model.CustomFields;
+import com.fds.opp.app.model.Message;
 import org.hibernate.Session;
 import java.sql.*;
 import com.fds.opp.app.model.Account;
@@ -15,54 +16,16 @@ import org.junit.Test;
 
 
 public class accountImpl {
-
-    public static void createAccount(Session session) throws Exception {
-        List<Account> accList = AccountSync.getListAccountFromAPI();
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            for (Account Account : accList) {
-                session.save(Account);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     public static void updateAccount(Session session, Account account) throws Exception {
-        Account accountAfterUpdate = session.get(Account.class, account.getIdUser());
-        accountAfterUpdate.setUsername(account.getUsername());
-        accountAfterUpdate.setIsAdmin(account.getIsAdmin());
-        accountAfterUpdate.setFirstname(account.getFirstname());
-        accountAfterUpdate.setLastname(account.getLastname());
-        accountAfterUpdate.setEmail(account.getEmail());
-        accountAfterUpdate.setStatus(account.getStatus());
-        accountAfterUpdate.setFullname(account.getFullname());
-        accountAfterUpdate.setCustomField(account.getCustomField());
-        accountAfterUpdate.setBotId(account.getBotId());
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            session.saveOrUpdate(accountAfterUpdate);
-            tx.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
+        try{
+            session.beginTransaction();
+            session.update(account);
+            session.getTransaction().commit();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
-
-    public static void addAccount(Session session, Account account) throws Exception {
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            session.save(account);
-            tx.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void delete(Session session, Account account) throws Exception {
         Account accountAfterDelete = session.get(Account.class, account.getIdUser());
         Transaction tx = null;
@@ -73,26 +36,6 @@ public class accountImpl {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static Account read(Session session, Integer id) throws Exception {
-        Account findAccount = session.get(Account.class, id);
-        return findAccount;
-    }
-
-    public static List<Account> readListAccount(Session session) throws Exception {
-        List<Account> accountList = null;
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            accountList = session.createQuery("FROM account", Account.class).getResultList();
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-        }
-        return accountList;
-
     }
 
     public static void syncAccount(Session session) throws Exception {
@@ -112,7 +55,6 @@ public class accountImpl {
         }
 
     }
-    @Test
     public void test(){
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
@@ -167,6 +109,40 @@ public class accountImpl {
             for (CustomFields customFields: customFieldsList) {
                 if(account.getIdUser() == customFields.getCustomized_id()){
                     account.setCustomField(customFields.getValue());
+                     status = true;
+                    break;
+                }
+            }
+            if(status==true){
+                updateAccount(session, account);
+            }
+        }
+        session.close();
+    }
+    public static void syncCustomFieldTable(Session session) throws Exception{
+        List<Account> accountList = AccountSync.getListAccountFromAPI();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            for (Account temp : accountList) {
+                session.saveOrUpdate(temp);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+        }
+        String Query = "FROM Account";
+        org.hibernate.query.Query query = session.createQuery(Query);
+        List<Account> accountList1 = query.getResultList();
+        List<CustomFields> customFieldsList = getListCustomField();
+        Boolean status;
+        for (Account account: accountList1) {
+            status = false;
+            for (CustomFields customFields: customFieldsList) {
+                if(account.getIdUser() == customFields.getCustomized_id()){
+                    account.setCustomField(customFields.getValue());
                     status = true;
                     break;
                 }
@@ -176,7 +152,52 @@ public class accountImpl {
             }
         }
 
-
     }
-
+    public static void insertNewAccountFromAPI(Session session) throws Exception {
+        List<Account> accountListAPI = AccountSync.getListAccountFromAPI();
+        String Query = "FROM Account";
+        org.hibernate.query.Query query = session.createQuery(Query);
+        List<Account> accountListDB = query.getResultList();
+        for (Account accountDB : accountListDB) {
+            for (Account accountAPI: accountListAPI) {
+                if(accountAPI.getIdUser() == accountDB.getIdUser()){
+                    accountListAPI.remove(accountAPI);
+                    break;
+                }
+            }
+        }
+        if (accountListAPI.size() != 0){
+            for (Account accountSync: accountListAPI) {
+                session.beginTransaction();
+                session.save(accountSync);
+                session.getTransaction().commit();
+            }
+        }
+    }
+    public static Account getAccountByCustomField(Session session, String usernameTelegram){
+        try {
+            String Query = "FROM Account AS A where A.customField= :customField_id";
+            org.hibernate.query.Query query = session.createQuery(Query);
+            query.setParameter("customField_id", usernameTelegram);
+            Account account = (Account) query.getSingleResult();
+            return account;
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public static Account getAccountByUserName(Session session, Message message){
+        try {
+            String Query = "FROM Account AS A where A.username= :username_insert";
+            org.hibernate.query.Query query = session.createQuery(Query);
+            query.setParameter("username_insert", message.getNameUser());
+            Account account = (Account) query.getSingleResult();
+            return account;
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }
