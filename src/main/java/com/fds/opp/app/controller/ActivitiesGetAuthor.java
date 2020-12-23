@@ -19,9 +19,9 @@ public class ActivitiesGetAuthor {
 
     public static String getAuthor(int idWorkPackage) throws Exception{
         Account accountResult = new Account();
-            String url = "http://localhost:8080/api/v3/work_packages/" + idWorkPackage + "/activities";
-            String user = "apikey";
-            String key = "86c12665ab843cb3f96690c7c53554adbfc95cf1544f0ece2519f269860488ab";
+            String url = ReadConfig.readKey("urlapiactivites") + idWorkPackage + "/activities";
+            String user = ReadConfig.readKey("userapi");
+            String key = ReadConfig.readKey("keyapi");
             String auth = user + ":" + key;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());;
             URL obj = new URL(url);
@@ -60,5 +60,9 @@ public class ActivitiesGetAuthor {
             Session session = sessionFactory.openSession();
             accountResult = session.get(Account.class, integerIdUser);
         return accountResult.getUsername();
+    }
+    @Test
+    public void test(){
+
     }
 }

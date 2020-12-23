@@ -19,11 +19,11 @@ import java.util.List;
 
 public class TelegramBotAPI extends TelegramLongPollingBot {
     public String getBotUsername() {
-        return "siriBot";
+        return ReadConfig.readKey("namebot");
     }
 
     public String getBotToken() {
-        return "1457198760:AAE0y_ODocLo_j8Bj6hs7QqkqKvVhnXDA7o";
+        return ReadConfig.readKey("bottokentelegram");
     }
 
     public void onUpdateReceived(Update update){
@@ -37,21 +37,23 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
             Long botIdTelegram = update.getMessage().getChatId();
             System.out.println(usernameTelegram);
             System.out.println(botIdTelegram);
+            SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+            Session session = sessionFactory.openSession();
             try {
-                aImpl.SyncCustomField();
+                aImpl.insertNewAccountFromAPI();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-            Session session = sessionFactory.openSession();
-            String Query = "FROM Account AS A where A.customField= :customField_id";
-            org.hibernate.query.Query query = session.createQuery(Query);
-            query.setParameter("customField_id", usernameTelegram);
-            Account account = (Account) query.getSingleResult();
+            try {
+                aImpl.syncCustomFieldTable();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Account account = accountImpl.getAccountByCustomField(usernameTelegram);
             account.setBotId(botIdTelegram.intValue());
             System.out.println(botIdTelegram.intValue());
             try {
-                aImpl.updateAccount(session, account);
+                accountImpl.updateAccount(account);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -72,7 +74,7 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
             execute(messageDetail);
             SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
             Session session = sessionFactory.openSession();
-            MessageImpl.updateStatusMessage(session, message, "Done");
+            MessageImpl.updateStatusMessage(message, "Done");
             session.close();
             System.out.println("Done Send Message!");
         } catch (TelegramApiException e) {
@@ -82,39 +84,36 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
     public static void callExec(){
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
-        List<Message> listMessagePending = MessageImpl.readPendingListMessage(session);
+        List<Message> listMessagePending = MessageImpl.readPendingListMessage();
         TelegramBotAPI telegramBot = new TelegramBotAPI();
         for (Message message: listMessagePending) {
-            String Query = "FROM Account AS A where A.username= :username_insert";
-            org.hibernate.query.Query query = session.createQuery(Query);
-            query.setParameter("username_insert", message.getNameUser());
-            Account account = (Account) query.getSingleResult();
+            Account account = accountImpl.getAccountByUserName(message);
             if(account.getBotId() != null){
                 telegramBot.sendMessage(message, account.getBotId());
             }
         }
         session.close();
     }
-    @Scheduled(fixedDelay = 1800000)
-    public void scheduleFixedDelayTask() throws InterruptedException {
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        List<Message> listMessagePending = MessageImpl.readPendingListMessage(session);
-        if(listMessagePending.size() != 0){
-            TelegramBotAPI telegramBot = new TelegramBotAPI();
-            for (Message message: listMessagePending) {
-                String Query = "FROM Account AS A where A.username= :username_insert";
-                org.hibernate.query.Query query = session.createQuery(Query);
-                query.setParameter("username_insert", message.getNameUser());
-                Account account = (Account) query.getSingleResult();
-                if(account.getBotId() != null){
-                    telegramBot.sendMessage(message, account.getBotId());
-                }
-            }
-            session.close();
-        } else{
-            System.out.println("Kiểm tra Pending Message : 0");
-        }
-    }
+
+//    public void scheduleFixedDelayTask() throws Exception {
+//        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+//        Session session = sessionFactory.openSession();
+//        List<Message> listMessagePending = MessageImpl.readPendingListMessage(session);
+//        if(listMessagePending.size() != 0){
+//            TelegramBotAPI telegramBot = new TelegramBotAPI();
+//            for (Message message: listMessagePending) {
+//                String Query = "FROM Account AS A where A.username= :username_insert";
+//                org.hibernate.query.Query query = session.createQuery(Query);
+//                query.setParameter("username_insert", message.getNameUser());
+//                Account account = (Account) query.getSingleResult();
+//                if(account.getBotId() != null){
+//                    telegramBot.sendMessage(message, account.getBotId());
+//                }
+//            }
+//            session.close();
+//        } else{
+//            System.out.println("Kiểm tra Pending Message : 0");
+//        }
+//    }
 
 }
