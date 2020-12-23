@@ -12,8 +12,10 @@ import java.util.List;
 
 @SpringBootApplication
 public class projectImpl {
-    public static void create(Session session)
+    public static void create()
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             List<Project> listProject = ProjectSync.getListProjectFromAPI();
             for (Project project: listProject) {
@@ -26,9 +28,12 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void addProject(Session session, Project project)
+    public static void addProject(Project project)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             session.beginTransaction();
             session.save(project);
@@ -38,9 +43,12 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void update(Session session, Project project)
+    public static void update(Project project)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             Project projectAfterUpdate = (Project) session.get(Project.class, project.getIdProject());
             projectAfterUpdate.setNameProject(project.getNameProject());
@@ -54,9 +62,12 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void delete(Session session, Project project) throws Exception
+    public static void delete(Project project) throws Exception
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             Project projectAfterDelete = (Project) session.get(Project.class, project.getIdProject());
             session.beginTransaction();
@@ -67,12 +78,14 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void read(Session session, Integer id)
+    public static void read(Integer id)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try
         {
-
             Project findProject = (Project) session.get(Project.class, id);
             System.out.println(findProject);
         }
@@ -80,9 +93,12 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void syncProject(Session session)
+    public static void syncProject()
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             List<Project> listProject = ProjectSync.getListProjectFromAPI();
             for (Project wp: listProject) {
@@ -95,6 +111,7 @@ public class projectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
 
 }

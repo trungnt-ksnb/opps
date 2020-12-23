@@ -62,25 +62,14 @@ public class AccountSync {
 				response.append(inputLine);
 			}
 			in.close();
-
-			// in tất cả thông tin user ra console voi toString
-			System.out.println(response.toString());
-
 			// khởi tạo và lưu thông tin các user dưới json
 			JSONObject myResponse = new JSONObject(response.toString());
 			count = Integer.parseInt(myResponse.get("count").toString());
 			if (count!=0){
 				offset++;
 			}
-			System.out.println(myResponse);
-			// Lấy dữ liệu từ embedded
-			System.out.println("Dữ liệu embedded: " + myResponse.get("_embedded"));
 			JSONObject Embedded = new JSONObject(myResponse.get("_embedded").toString());
-			// lấy elements
-			System.out.println(Embedded);
-			System.out.println("Dữ liệu elements: " + Embedded.get("elements"));
 			JSONArray Elements = new JSONArray(Embedded.get("elements").toString());
-			System.out.println("----------------------------------");
 
 			for(int i=0;i<Elements.length();i++) {
 				JSONObject obj_i = Elements.getJSONObject(i);

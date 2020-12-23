@@ -27,13 +27,12 @@ public class WebhookController {
     @PostMapping("/create")
     public List<com.fds.opp.app.model.Message> newRequest(@RequestBody String JsonString) throws Exception {
         List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
         JSONObject request = new JSONObject(JsonString);
         String action = request.get("action").toString();
         String MessageContent = "";
         Locale localeEn = new Locale("vi");
         ResourceBundle labels = ResourceBundle.getBundle("messages", localeEn);
+
         if (action.equals("project:created") || action.equals("project:updated")) {
             Project newProject = new Project();
             JSONObject project = new JSONObject(request.get("project").toString());
@@ -43,10 +42,13 @@ public class WebhookController {
             newProject.setDescriptionProject(description.get("raw").toString());
             newProject.setStatus(project.get("status").toString());
             if (action.equals("project:created")) {
-                projectImpl.addProject(session, newProject);
-                session.close();
+                projectImpl.addProject(newProject);
+
             } else if (action.equals("project:updated")) {
+                SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+                Session session = sessionFactory.openSession();
                 Project oldProject = session.get(Project.class, newProject.getIdProject());
+                session.close();
                 if (oldProject.getNameProject().equals(newProject.getNameProject())) {
                     MessageContent += labels.getString("projectNameUpdated")
                             + oldProject.getNameProject() + " -> "
@@ -60,8 +62,8 @@ public class WebhookController {
                             + oldProject.getStatus() + " -> "
                             + newProject.getStatus() + "\n";
                 }
-                memberInProjectImpl.syncMemberInProject(session);
-                List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, oldProject.getNameProject());
+                memberInProjectImpl.syncMemberInProject();
+                List<MemberInProject> memberInProjects = memberInProjectImpl.read(oldProject.getNameProject());
                 assert memberInProjects != null;
                 for (MemberInProject eachMember : memberInProjects) {
                     com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
@@ -135,9 +137,7 @@ public class WebhookController {
             JSONObject type = new JSONObject(_embedded.get("type").toString());
             newWorkPackage.setTypeWorkPackage(type.get("name").toString());
             if (action.equals("work_package:created")) {
-                session = sessionFactory.openSession();
-                workPackageImpl.addWorkPackage(session, newWorkPackage);
-                session.close();
+                workPackageImpl.addWorkPackage(newWorkPackage);
                 if (!newWorkPackage.getNameWorkPackage().equals("")) {
                     MessageContent += labels.getString("workpackageNameCreated") + newWorkPackage.getNameWorkPackage() + "\n";
                 }
@@ -153,10 +153,8 @@ public class WebhookController {
                             + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
                 }
                 if (!newWorkPackage.getNameUser().equals("null") || !newWorkPackage.getAccountable().equals("null")) {
-                    session = sessionFactory.openSession();
-                    memberInProjectImpl.syncMemberInProject(session);
-                    List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
-                    session.close();
+                    memberInProjectImpl.syncMemberInProject();
+                    List<MemberInProject> memberInProjects = memberInProjectImpl.read(newWorkPackage.getNameProject());
                     for (MemberInProject mip : memberInProjects) {
                         if (mip.getNameUser().equals(newWorkPackage.getNameUser())) {
                             MessageContent += labels.getString("workpackageAssigneeCreated")
@@ -168,9 +166,7 @@ public class WebhookController {
                             newMessage.setMessage(MessageContent);
                             newMessage.setStatus("Pending...");
                             listMessage.add(newMessage);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, newMessage);
-                            session.close();
+                            MessageImpl.addNewMessage(newMessage);
                         }
                         if (mip.getNameUser().equals(newWorkPackage.getAccountable())) {
                             MessageContent += labels.getString("workpackageAccountableCreated")
@@ -182,9 +178,7 @@ public class WebhookController {
                             newMessage.setMessage(MessageContent);
                             newMessage.setStatus("Pending...");
                             listMessage.add(newMessage);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, newMessage);
-                            session.close();
+                            MessageImpl.addNewMessage(newMessage);
                         }
                         if (mip.getRoles().equals("Project admin")) {
                             MessageContent += labels.getString("workpackageMessageForAdmin")
@@ -196,16 +190,18 @@ public class WebhookController {
                             newMessage.setMessage(MessageContent);
                             newMessage.setStatus("Pending...");
                             listMessage.add(newMessage);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, newMessage);
-                            session.close();
+
+                            MessageImpl.addNewMessage(newMessage);
                         } else {
                             System.out.println("Không gửi : " + mip.getNameUser());
                         }
                     }
                 }
             } else if (action.equals("work_package:updated")) {
+                SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+                Session session = sessionFactory.openSession();
                 WorkPackage oldWorkPackage = session.get(WorkPackage.class, newWorkPackage.getIdWorkPackage());
+                session.close();
                 if (!oldWorkPackage.getNameWorkPackage().equals(newWorkPackage.getNameWorkPackage())) {
                     MessageContent += labels.getString("workpackageNameUpdated")
                             + oldWorkPackage.getNameWorkPackage() + " -> "
@@ -216,6 +212,7 @@ public class WebhookController {
                             + oldWorkPackage.getDescriptionWorkPackage() + " -> "
                             + newWorkPackage.getDescriptionWorkPackage() + "\n";
                 }
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 if (oldWorkPackage.getStartDate() == null ||
                         oldWorkPackage.getDueDate() == null ||
                         oldWorkPackage.getDeadlineDate() == null) {
@@ -230,14 +227,22 @@ public class WebhookController {
                                 + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
                                 + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
                     }
-                } else if (oldWorkPackage.getStartDate().compareTo(newWorkPackage.getStartDate()) != 0 ||
-                        oldWorkPackage.getDueDate().compareTo(newWorkPackage.getDueDate()) != 0 ||
-                        oldWorkPackage.getDeadlineDate().compareTo(newWorkPackage.getDeadlineDate()) != 0) {
-                    MessageContent += labels.getString("workpackageTimeUpdated1")
-                            + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated")
-                            + workPackageImpl.DateString(newWorkPackage.getStartDate().toString()) + " - "
-                            + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
-                            + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
+                } else {
+                    SimpleDateFormat in = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                    SimpleDateFormat out = new SimpleDateFormat("dd/MM/yyyy");
+                    String oldStartDate = out.format(in.parse(oldWorkPackage.getStartDate().toString()));
+                    String oldDueDate = out.format(in.parse(oldWorkPackage.getDueDate().toString()));
+                    String oldDeadlineDate = out.format(in.parse(oldWorkPackage.getDeadlineDate().toString()));
+                    String newDeadlineDate = workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString());
+                    String newStartDate = workPackageImpl.DateString(newWorkPackage.getStartDate().toString());
+                    String newDueDate = workPackageImpl.DateString(newWorkPackage.getDueDate().toString());
+                    if (!oldStartDate.equals(newStartDate) || !!oldDueDate.equals(newDueDate) || !oldDeadlineDate.equals(newDeadlineDate)) {
+                        MessageContent += labels.getString("workpackageTimeUpdated1")
+                                + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated")
+                                + workPackageImpl.DateString(newWorkPackage.getStartDate().toString()) + " - "
+                                + workPackageImpl.DateString(newWorkPackage.getDueDate().toString()) + "\n Deadline : "
+                                + workPackageImpl.DateString(newWorkPackage.getDeadlineDate().toString()) + "\n";
+                    }
                 }
                 if (!oldWorkPackage.getPriorityWorkPackage().equals(newWorkPackage.getPriorityWorkPackage())) {
                     MessageContent += labels.getString("worpackagePriorityUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getPriorityWorkPackage() + " -> " + newWorkPackage.getPriorityWorkPackage() + "\n";
@@ -255,13 +260,10 @@ public class WebhookController {
                     MessageContent += labels.getString("workpackageAccountableUpdated") + newWorkPackage.getNameWorkPackage() + labels.getString("workpackageBeingUpdated") + oldWorkPackage.getNameUser() + " -> " + newWorkPackage.getNameUser() + "\n";
                 }
 
-                workPackageImpl.update(session, newWorkPackage);
-                session.close();
+                workPackageImpl.update(newWorkPackage);
                 if (!MessageContent.equals("")) {
-                    session = sessionFactory.openSession();
-                    memberInProjectImpl.syncMemberInProject(session);
-                    List<MemberInProject> memberInProjects = memberInProjectImpl.read(session, newWorkPackage.getNameProject());
-                    session.close();
+                    memberInProjectImpl.syncMemberInProject();
+                    List<MemberInProject> memberInProjects = memberInProjectImpl.read(newWorkPackage.getNameProject());
                     for (MemberInProject eachMember : memberInProjects) {
                         if (eachMember.getNameUser().equals(newWorkPackage.getAccountable())) {
                             Message MessageObj = new Message();
@@ -270,9 +272,7 @@ public class WebhookController {
                             MessageObj.setMessage(MessageContent);
                             MessageObj.setStatus("Pending...");
                             listMessage.add(MessageObj);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, MessageObj);
-                            session.close();
+                            MessageImpl.addNewMessage(MessageObj);
                         }
                         if (eachMember.getNameUser().equals(newWorkPackage.getNameUser())) {
                             Message MessageObj = new Message();
@@ -281,9 +281,7 @@ public class WebhookController {
                             MessageObj.setMessage(MessageContent);
                             MessageObj.setStatus("Pending...");
                             listMessage.add(MessageObj);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, MessageObj);
-                            session.close();
+                            MessageImpl.addNewMessage(MessageObj);
                         }
                         if (eachMember.getRoles().equals("Project admin")) {
                             Message MessageObj = new Message();
@@ -292,9 +290,7 @@ public class WebhookController {
                             MessageObj.setMessage(MessageContent);
                             MessageObj.setStatus("Pending...");
                             listMessage.add(MessageObj);
-                            session = sessionFactory.openSession();
-                            MessageImpl.addNewMessage(session, MessageObj);
-                            session.close();
+                            MessageImpl.addNewMessage(MessageObj);
                         } else {
                             System.out.println("Người k gửi : " + eachMember.getNameUser());
                         }
@@ -313,3 +309,4 @@ public class WebhookController {
     }
 
 }
+

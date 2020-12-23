@@ -61,4 +61,8 @@ public class ActivitiesGetAuthor {
             accountResult = session.get(Account.class, integerIdUser);
         return accountResult.getUsername();
     }
+    @Test
+    public void test(){
+
+    }
 }

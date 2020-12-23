@@ -40,20 +40,20 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
             SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
             Session session = sessionFactory.openSession();
             try {
-                aImpl.insertNewAccountFromAPI(session);
+                aImpl.insertNewAccountFromAPI();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
-                aImpl.syncCustomFieldTable(session);
+                aImpl.syncCustomFieldTable();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Account account = accountImpl.getAccountByCustomField(session, usernameTelegram);
+            Account account = accountImpl.getAccountByCustomField(usernameTelegram);
             account.setBotId(botIdTelegram.intValue());
             System.out.println(botIdTelegram.intValue());
             try {
-                accountImpl.updateAccount(session, account);
+                accountImpl.updateAccount(account);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -74,7 +74,7 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
             execute(messageDetail);
             SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
             Session session = sessionFactory.openSession();
-            MessageImpl.updateStatusMessage(session, message, "Done");
+            MessageImpl.updateStatusMessage(message, "Done");
             session.close();
             System.out.println("Done Send Message!");
         } catch (TelegramApiException e) {
@@ -84,10 +84,10 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
     public static void callExec(){
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
-        List<Message> listMessagePending = MessageImpl.readPendingListMessage(session);
+        List<Message> listMessagePending = MessageImpl.readPendingListMessage();
         TelegramBotAPI telegramBot = new TelegramBotAPI();
         for (Message message: listMessagePending) {
-            Account account = accountImpl.getAccountByUserName(session, message);
+            Account account = accountImpl.getAccountByUserName(message);
             if(account.getBotId() != null){
                 telegramBot.sendMessage(message, account.getBotId());
             }

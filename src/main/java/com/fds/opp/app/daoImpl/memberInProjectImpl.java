@@ -15,8 +15,10 @@ import java.util.List;
 @Service
 @Transactional
 public class memberInProjectImpl {
-    public static void create(Session session) throws Exception
+    public static void create() throws Exception
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         System.out.println("Creating Table Project...");
         List<MemberInProject> listMemberInProject = MemberInProjectSync.getListMemberInProject();
         for (MemberInProject memberInProject: listMemberInProject) {
@@ -24,14 +26,12 @@ public class memberInProjectImpl {
             session.save(memberInProject);
             session.getTransaction().commit();
         }
+        session.close();
     }
-    public static void addNewMemberInProject(Session session, MemberInProject memberInProject){
-        session.beginTransaction();
-        session.save(memberInProject);
-        session.getTransaction().commit();
-    }
-    public static void syncMemberInProject(Session session)
+    public static void syncMemberInProject()
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             List<MemberInProject> listMemberInProject = MemberInProjectSync.getListMemberInProject();
             for (MemberInProject mip:listMemberInProject) {
@@ -44,10 +44,13 @@ public class memberInProjectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
 
-    public static void update(Session session, MemberInProject memberUpdate)
+    public static void update(MemberInProject memberUpdate)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             MemberInProject memberInPorjectBefore = (MemberInProject) session.get(MemberInProject.class, memberUpdate.getIdMemberShip());
             memberInPorjectBefore.setIdMemberShip(memberUpdate.getIdMemberShip());
@@ -62,9 +65,12 @@ public class memberInProjectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static void delete(Session session, Integer idMemberInProject)
+    public static void delete(Integer idMemberInProject)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             MemberInProject objectToDelete = (MemberInProject) session.get(MemberInProject.class, idMemberInProject);
             session.beginTransaction();
@@ -75,25 +81,32 @@ public class memberInProjectImpl {
         {
             e.printStackTrace();
         }
+        session.close();
     }
-    public static List<MemberInProject> read(Session session, String nameProject)
+    public static List<MemberInProject> read(String nameProject)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try
         {
             List<MemberInProject> result = new ArrayList<>();
             List<MemberInProject> findMemberInProject = session.createQuery("from MemberInProject", MemberInProject.class).getResultList();
+            session.close();
             for (MemberInProject memberInProject:findMemberInProject) {
                 if(memberInProject.getNameProject().equals(nameProject)){
                     result.add(memberInProject);
                     System.out.println(memberInProject);
                 }
             }
+
             return result;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            session.close();
             return null;
         }
+
     }
 }

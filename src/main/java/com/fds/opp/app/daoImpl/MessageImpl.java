@@ -15,7 +15,9 @@ import java.util.List;
 @Service
 @Transactional
 public class MessageImpl {
-    public static void addNewMessage(Session session, Message message) {
+    public static void addNewMessage(Message message) {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             session.beginTransaction();
             session.save(message);
@@ -24,9 +26,12 @@ public class MessageImpl {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+        session.close();
     }
-    public static void updateStatusMessage (Session session, Message message, String status)
+    public static void updateStatusMessage (Message message, String status)
     {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             Message MessageToUpdate = session.get(Message.class, message.getIdMessage());
             MessageToUpdate.setStatus(status);
@@ -37,8 +42,11 @@ public class MessageImpl {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+        session.close();
     }
-    public static List<Message> readPendingListMessage(Session session){
+    public static List<Message> readPendingListMessage(){
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             List<Message> listResult = new ArrayList<>();
             List<Message> listMessage = session.createQuery("from Message", Message.class).getResultList();
@@ -47,10 +55,12 @@ public class MessageImpl {
                     listResult.add(message);
                 }
             }
+            session.close();
             return listResult;
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            session.close();
             return null;
         }
     }

@@ -3,6 +3,7 @@ package com.fds.opp.app.daoImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fds.opp.app.controller.ReadConfig;
 import com.fds.opp.app.model.CustomFields;
 import com.fds.opp.app.model.Message;
 import org.hibernate.Session;
@@ -16,7 +17,9 @@ import org.junit.Test;
 
 
 public class accountImpl {
-    public static void updateAccount(Session session, Account account) throws Exception {
+    public static void updateAccount(Account account) throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try{
             session.beginTransaction();
             session.update(account);
@@ -25,52 +28,14 @@ public class accountImpl {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-    public static void delete(Session session, Account account) throws Exception {
-        Account accountAfterDelete = session.get(Account.class, account.getIdUser());
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            session.saveOrUpdate(accountAfterDelete);
-            tx.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void syncAccount(Session session) throws Exception {
-        List<Account> accountList = AccountSync.getListAccountFromAPI();
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            for (Account temp : accountList) {
-                session.saveOrUpdate(temp);
-
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-        }
-
-    }
-    public void test(){
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        List<Account> listAccount = session.createQuery("From Account").getResultList();
         session.close();
-        System.out.println(listAccount);
-        for (Account account: listAccount) {
-            System.out.println(account.getUsername());
-        }
     }
     public static List<CustomFields> getListCustomField(){
-        String host="localhost";
-        String port="5436";
-        String dbname="openproject";
-        String user="postgres";
-        String pass="p4ssw0rd";
+        String host= ReadConfig.readKey("host");
+        String port= ReadConfig.readKey("port");
+        String dbname= ReadConfig.readKey("dbname");
+        String user= ReadConfig.readKey("userOpenProject");
+        String pass= ReadConfig.readKey("passOpenProject");
         String dburl = "jdbc:postgresql://"+host+":"+port+"/"+dbname+"?loggerLevel=OFF";
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -97,29 +62,9 @@ public class accountImpl {
             return null;
         }
     }
-    public static void SyncCustomField() throws Exception {
+    public static void syncCustomFieldTable() throws Exception{
         SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
         Session session = sessionFactory.openSession();
-        List<Account> accountList = session.createQuery("From Account").getResultList();
-        boolean status = false;
-//        session.close();
-        List<CustomFields> customFieldsList = getListCustomField();
-        for (Account account: accountList) {
-            status = false;
-            for (CustomFields customFields: customFieldsList) {
-                if(account.getIdUser() == customFields.getCustomized_id()){
-                    account.setCustomField(customFields.getValue());
-                     status = true;
-                    break;
-                }
-            }
-            if(status==true){
-                updateAccount(session, account);
-            }
-        }
-        session.close();
-    }
-    public static void syncCustomFieldTable(Session session) throws Exception{
         List<Account> accountList = AccountSync.getListAccountFromAPI();
         Transaction tx = null;
         try {
@@ -148,12 +93,15 @@ public class accountImpl {
                 }
             }
             if(status==true){
-                updateAccount(session, account);
+                updateAccount(account);
             }
         }
+        session.close();
 
     }
-    public static void insertNewAccountFromAPI(Session session) throws Exception {
+    public static void insertNewAccountFromAPI() throws Exception {
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         List<Account> accountListAPI = AccountSync.getListAccountFromAPI();
         String Query = "FROM Account";
         org.hibernate.query.Query query = session.createQuery(Query);
@@ -173,30 +121,40 @@ public class accountImpl {
                 session.getTransaction().commit();
             }
         }
+        session.close();
     }
-    public static Account getAccountByCustomField(Session session, String usernameTelegram){
+    public static Account getAccountByCustomField(String usernameTelegram){
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             String Query = "FROM Account AS A where A.customField= :customField_id";
             org.hibernate.query.Query query = session.createQuery(Query);
             query.setParameter("customField_id", usernameTelegram);
             Account account = (Account) query.getSingleResult();
+            session.close();
             return account;
         }
         catch (Exception ex){
             ex.printStackTrace();
+            session.close();
             return null;
         }
+
     }
-    public static Account getAccountByUserName(Session session, Message message){
+    public static Account getAccountByUserName(Message message){
+        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+        Session session = sessionFactory.openSession();
         try {
             String Query = "FROM Account AS A where A.username= :username_insert";
             org.hibernate.query.Query query = session.createQuery(Query);
             query.setParameter("username_insert", message.getNameUser());
             Account account = (Account) query.getSingleResult();
+            session.close();
             return account;
         }
         catch (Exception ex){
             ex.printStackTrace();
+            session.close();
             return null;
         }
     }
