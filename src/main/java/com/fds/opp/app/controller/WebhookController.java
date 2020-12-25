@@ -29,7 +29,7 @@ public class WebhookController {
         List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
         JSONObject request = new JSONObject(JsonString);
         String action = request.get("action").toString();
-        String MessageContent = null;
+        String MessageContent = "";
         Locale localeEn = new Locale("vi");
         ResourceBundle labels = ResourceBundle.getBundle("messages", localeEn);
         if (action.equals("project:created") || action.equals("project:updated")) {
@@ -69,7 +69,7 @@ public class WebhookController {
                             + oldProject.getStatus() + " -> "
                             + newProject.getStatus() + "\n";
                 }
-                if(MessageContent!=null){
+                if(MessageContent!=""){
                     memberInProjectImpl.syncMemberInProject();
                     List<MemberInProject> memberInProjects = memberInProjectImpl.read(oldProject.getNameProject());
                     assert memberInProjects != null;
