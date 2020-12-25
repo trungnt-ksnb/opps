@@ -2,7 +2,7 @@ package com.fds.opp.app.daoImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.hibernate.query.Query;
 import com.fds.opp.app.controller.ReadConfig;
 import com.fds.opp.app.model.CustomFields;
 import com.fds.opp.app.model.Message;
@@ -13,7 +13,6 @@ import com.fds.opp.app.syncDatabase.AccountSync;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.junit.Test;
 
 
 public class accountImpl {
@@ -30,6 +29,32 @@ public class accountImpl {
         }
         session.close();
     }
+    public static Integer getIdCusTomField(){
+        String host= ReadConfig.readKey("host");
+        String port= ReadConfig.readKey("port");
+        String dbname= ReadConfig.readKey("dbname");
+        String user= ReadConfig.readKey("userOpenProject");
+        String pass= ReadConfig.readKey("passOpenProject");
+        String dburl = "jdbc:postgresql://"+host+":"+port+"/"+dbname+"?loggerLevel=OFF";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet ret = null;
+        List<CustomFields> listResult = new ArrayList<>();
+        try{
+            conn = DriverManager.getConnection(dburl, user, pass);
+            String QueryGetIDCustomField = "select id from custom_fields where name='"+ ReadConfig.readKey("nameCustomField") + "'";
+            pstmt = conn.prepareStatement(QueryGetIDCustomField);
+            ret = pstmt.executeQuery();
+            while(ret.next()){
+                return ret.getInt("id");
+            }
+            ret.close();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+            return null;
+        }
+        return null;
+    }
     public static List<CustomFields> getListCustomField(){
         String host= ReadConfig.readKey("host");
         String port= ReadConfig.readKey("port");
@@ -43,7 +68,8 @@ public class accountImpl {
         List<CustomFields> listResult = new ArrayList<>();
         try{
             conn = DriverManager.getConnection(dburl, user, pass);
-            pstmt = conn.prepareStatement("select * from custom_values where customized_type = 'Principal';");
+            String QueryGetIDCustomField = "select * from custom_values where custom_field_id='" + getIdCusTomField() + "'";
+            pstmt = conn.prepareStatement(QueryGetIDCustomField);
             ret = pstmt.executeQuery();
             while(ret.next()){
                 CustomFields customFields = new CustomFields();
@@ -53,9 +79,6 @@ public class accountImpl {
                 listResult.add(customFields);
             }
             ret.close();
-            for (CustomFields cf: listResult) {
-                System.out.println(cf.getValue());
-            }
             return listResult;
         }catch(SQLException ex){
             ex.printStackTrace();
@@ -79,12 +102,13 @@ public class accountImpl {
             }
         }
         String Query = "FROM Account";
-        org.hibernate.query.Query query = session.createQuery(Query);
+        Query query = session.createQuery(Query);
         List<Account> accountList1 = query.getResultList();
         List<CustomFields> customFieldsList = getListCustomField();
         Boolean status;
         for (Account account: accountList1) {
             status = false;
+            assert customFieldsList != null;
             for (CustomFields customFields: customFieldsList) {
                 if(account.getIdUser() == customFields.getCustomized_id()){
                     account.setCustomField(customFields.getValue());
@@ -92,7 +116,7 @@ public class accountImpl {
                     break;
                 }
             }
-            if(status==true){
+            if(status){
                 updateAccount(account);
             }
         }
@@ -104,7 +128,7 @@ public class accountImpl {
         Session session = sessionFactory.openSession();
         List<Account> accountListAPI = AccountSync.getListAccountFromAPI();
         String Query = "FROM Account";
-        org.hibernate.query.Query query = session.createQuery(Query);
+        Query query = session.createQuery(Query);
         List<Account> accountListDB = query.getResultList();
         for (Account accountDB : accountListDB) {
             for (Account accountAPI: accountListAPI) {
@@ -128,7 +152,7 @@ public class accountImpl {
         Session session = sessionFactory.openSession();
         try {
             String Query = "FROM Account AS A where A.customField= :customField_id";
-            org.hibernate.query.Query query = session.createQuery(Query);
+            Query query = session.createQuery(Query);
             query.setParameter("customField_id", usernameTelegram);
             Account account = (Account) query.getSingleResult();
             session.close();
@@ -146,7 +170,7 @@ public class accountImpl {
         Session session = sessionFactory.openSession();
         try {
             String Query = "FROM Account AS A where A.username= :username_insert";
-            org.hibernate.query.Query query = session.createQuery(Query);
+            Query query = session.createQuery(Query);
             query.setParameter("username_insert", message.getNameUser());
             Account account = (Account) query.getSingleResult();
             session.close();

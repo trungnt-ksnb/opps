@@ -29,10 +29,9 @@ public class WebhookController {
         List<com.fds.opp.app.model.Message> listMessage = new ArrayList<>();
         JSONObject request = new JSONObject(JsonString);
         String action = request.get("action").toString();
-        String MessageContent = "";
+        String MessageContent = null;
         Locale localeEn = new Locale("vi");
         ResourceBundle labels = ResourceBundle.getBundle("messages", localeEn);
-
         if (action.equals("project:created") || action.equals("project:updated")) {
             Project newProject = new Project();
             JSONObject project = new JSONObject(request.get("project").toString());
@@ -43,34 +42,46 @@ public class WebhookController {
             newProject.setStatus(project.get("status").toString());
             if (action.equals("project:created")) {
                 projectImpl.addProject(newProject);
-
             } else if (action.equals("project:updated")) {
                 SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
                 Session session = sessionFactory.openSession();
                 Project oldProject = session.get(Project.class, newProject.getIdProject());
                 session.close();
-                if (oldProject.getNameProject().equals(newProject.getNameProject())) {
+                projectImpl.update(newProject);
+                if (!oldProject.getNameProject().equals(newProject.getNameProject())) {
                     MessageContent += labels.getString("projectNameUpdated")
                             + oldProject.getNameProject() + " -> "
                             + newProject.getNameProject() + "\n";
-                } else if (oldProject.getDescriptionProject().equals(newProject.getDescriptionProject())) {
+                }
+                if (!oldProject.getDescriptionProject().equals(newProject.getDescriptionProject())) {
                     MessageContent += labels.getString("projectDescriptionupdated")
                             + oldProject.getDescriptionProject() + " -> "
                             + newProject.getDescriptionProject() + "\n";
-                } else if (oldProject.getStatus().equals(newProject.getStatus())) {
+                }
+                if (oldProject.getStatus() == null){
+                    oldProject.setStatus("");
+                }
+                if (newProject.getStatus() == null){
+                    oldProject.setStatus("");
+                }
+                if (!oldProject.getStatus().equals(newProject.getStatus())) {
                     MessageContent += labels.getString("projectStatusUpdated")
                             + oldProject.getStatus() + " -> "
                             + newProject.getStatus() + "\n";
                 }
-                memberInProjectImpl.syncMemberInProject();
-                List<MemberInProject> memberInProjects = memberInProjectImpl.read(oldProject.getNameProject());
-                assert memberInProjects != null;
-                for (MemberInProject eachMember : memberInProjects) {
-                    com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
-                    MessageObj.setNameUser(eachMember.getNameUser());
-                    MessageObj.setRole(eachMember.getRoles());
-                    MessageObj.setMessage(MessageContent);
-                    listMessage.add(MessageObj);
+                if(MessageContent!=null){
+                    memberInProjectImpl.syncMemberInProject();
+                    List<MemberInProject> memberInProjects = memberInProjectImpl.read(oldProject.getNameProject());
+                    assert memberInProjects != null;
+                    for (MemberInProject eachMember : memberInProjects) {
+                        com.fds.opp.app.model.Message MessageObj = new com.fds.opp.app.model.Message();
+                        MessageObj.setNameUser(eachMember.getNameUser());
+                        MessageObj.setRole(eachMember.getRoles());
+                        MessageObj.setMessage(MessageContent);
+                        MessageObj.setStatus("Pending...");
+                        listMessage.add(MessageObj);
+                        MessageImpl.addNewMessage(MessageObj);
+                    }
                 }
             } else {
                 System.out.println("Lỗi Package!! ");
@@ -155,6 +166,7 @@ public class WebhookController {
                 if (!newWorkPackage.getNameUser().equals("null") || !newWorkPackage.getAccountable().equals("null")) {
                     memberInProjectImpl.syncMemberInProject();
                     List<MemberInProject> memberInProjects = memberInProjectImpl.read(newWorkPackage.getNameProject());
+                    assert memberInProjects != null;
                     for (MemberInProject mip : memberInProjects) {
                         if (mip.getNameUser().equals(newWorkPackage.getNameUser())) {
                             MessageContent += labels.getString("workpackageAssigneeCreated")
@@ -167,8 +179,7 @@ public class WebhookController {
                             newMessage.setStatus("Pending...");
                             listMessage.add(newMessage);
                             MessageImpl.addNewMessage(newMessage);
-                        }
-                        if (mip.getNameUser().equals(newWorkPackage.getAccountable())) {
+                        } else if (mip.getNameUser().equals(newWorkPackage.getAccountable())) {
                             MessageContent += labels.getString("workpackageAccountableCreated")
                                     + newWorkPackage.getIdWorkPackage() + " : "
                                     + newWorkPackage.getNameWorkPackage() + "\n";
@@ -190,7 +201,6 @@ public class WebhookController {
                             newMessage.setMessage(MessageContent);
                             newMessage.setStatus("Pending...");
                             listMessage.add(newMessage);
-
                             MessageImpl.addNewMessage(newMessage);
                         } else {
                             System.out.println("Không gửi : " + mip.getNameUser());

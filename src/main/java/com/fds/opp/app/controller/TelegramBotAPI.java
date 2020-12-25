@@ -82,8 +82,6 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
         }
     }
     public static void callExec(){
-        SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
-        Session session = sessionFactory.openSession();
         List<Message> listMessagePending = MessageImpl.readPendingListMessage();
         TelegramBotAPI telegramBot = new TelegramBotAPI();
         for (Message message: listMessagePending) {
@@ -92,7 +90,7 @@ public class TelegramBotAPI extends TelegramLongPollingBot {
                 telegramBot.sendMessage(message, account.getBotId());
             }
         }
-        session.close();
+
     }
 
 //    public void scheduleFixedDelayTask() throws Exception {

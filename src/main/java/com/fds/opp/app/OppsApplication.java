@@ -2,7 +2,6 @@ package com.fds.opp.app;
 
 import com.fds.opp.app.controller.InitBotTelegram;
 import com.fds.opp.app.controller.ReadConfig;
-import com.fds.opp.app.controller.TelegramBotAPI;
 import com.fds.opp.app.daoImpl.accountImpl;
 import com.fds.opp.app.daoImpl.memberInProjectImpl;
 import com.fds.opp.app.daoImpl.projectImpl;
@@ -14,9 +13,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.telegram.telegrambots.ApiContextInitializer;
-import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 @SpringBootApplication
 public class OppsApplication {
@@ -43,6 +39,7 @@ public class OppsApplication {
 		}
 		InitBotTelegram.Init();
 		SpringApplication.run(OppsApplication.class, args);
+
 	}
 
 }
